@@ -1,0 +1,1711 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Інтерактивне заняття для школярів: що таке промпт, навіщо і як ним користуватися.">
+<title>Промпт-лабораторія</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;500;600;700;800&family=Rubik:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: sunny school-club look — chunky "sticker" slides with a yellow offset shadow,
+   a squared-notebook workbook, chat bubbles for every prompt. One light theme by design. */
+:root{
+  --sun:#FDBB15; --sun-deep:#D99A00; --sun-soft:#FFF2C9; --sun-pale:#FFF9E6;
+  --ink:#1C1A29; --ink-2:#55516A; --ink-3:#8A8698;
+  --bg:#FFFDF6; --card:#FFFFFF; --line:#ECE5D0;
+  --sky:#2459E0; --sky-soft:#E4ECFF;
+  --mint:#0B7A4C; --mint-b:#19A56B; --mint-soft:#DDF5EA;
+  --coral:#C4343A; --coral-b:#E5484D; --coral-soft:#FDE5E5;
+  --grape:#6A47E0; --grape-soft:#EEE8FF;
+  --amber-t:#7A5200;
+  --grid:#DCE7F5; --margin:#F3A9A9;
+  --f-display:'Rubik','Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-body:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --f-hand:'Caveat','Segoe Print','Comic Sans MS',cursive;
+  --r:18px; --r-lg:28px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--f-body);margin:0}
+a{color:var(--sky);text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:8px}
+[tabindex="-1"]:focus{outline:none}
+h1,h2,h3{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.25em}
+mark{background:none;color:inherit;position:relative;z-index:0;white-space:nowrap}
+mark::before{content:"";position:absolute;left:-.08em;right:-.08em;bottom:.06em;height:.42em;background:var(--sun);border-radius:6px;z-index:-1;transform:rotate(-1deg)}
+.muted{color:var(--ink-3)}
+.small{font-size:14px}
+.center{text-align:center}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+[hidden]{display:none!important}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 22px;border-radius:999px;border:2px solid var(--ink);background:var(--sun);color:var(--ink);font:600 15px/1.1 var(--f-display);letter-spacing:.05em;text-transform:uppercase;text-decoration:none;cursor:pointer;box-shadow:0 4px 0 var(--ink);transition:transform .12s ease, box-shadow .12s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 5px 0 var(--ink)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.ghost{background:var(--card)}
+.btn.blue{background:var(--sky);color:#fff;border-color:var(--ink)}
+.btn.small{min-height:38px;padding:7px 16px;font-size:13px;box-shadow:0 3px 0 var(--ink)}
+.btn.big{min-height:54px;padding:12px 28px;font-size:16px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:0 2px 0 var(--ink)}
+
+/* header */
+.app{min-height:100%;display:flex;flex-direction:column}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px max(16px,calc((100% - 1160px)/2));background:rgba(255,253,246,.94);backdrop-filter:blur(8px);border-bottom:1.5px solid var(--line)}
+.brand{display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font:700 18px/1 var(--f-display)}
+.mark-ic{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:11px;background:var(--sun);border:2px solid var(--ink);flex:none}
+.mark-ic svg{width:24px;height:24px}
+.mark-ic path{fill:var(--card);stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
+.mark-ic circle{fill:var(--ink)}
+.school{display:inline-flex;align-items:center;gap:8px;font:600 14px/1.2 var(--f-display);color:var(--ink-2)}
+.school img{height:30px;width:auto;display:block}
+.tnav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.tnav a{padding:8px 14px;border-radius:999px;color:var(--ink);text-decoration:none;font:600 14px/1 var(--f-display)}
+.tnav a:hover{background:var(--sun-soft)}
+.tnav a.on{background:var(--ink);color:var(--card)}
+.starpill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;border-radius:999px;background:var(--sun-soft);border:1.5px solid var(--sun);font:700 14px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.star{width:20px;height:20px;display:block}
+.star path{fill:var(--sun);stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round}
+main{flex:1;width:100%;max-width:1160px;margin:0 auto;padding-inline:16px;padding-block:28px 48px}
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px max(16px,calc((100% - 1160px)/2));border-top:1.5px solid var(--line);font-size:14px;color:var(--ink-3)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,calc(100% + 60px));visibility:hidden;display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:999px;background:var(--ink);color:var(--card);font:600 15px/1.2 var(--f-display);box-shadow:0 10px 30px rgba(28,26,41,.25);transition:transform .35s cubic-bezier(.2,.9,.3,1.3),visibility .35s;z-index:50;max-width:calc(100% - 32px)}
+.toast.on{transform:translate(-50%,0);visibility:visible}
+.toast .star{width:22px;height:22px}
+
+/* home */
+.page{display:flex;flex-direction:column;gap:22px}
+.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:36px;align-items:center;padding:12px 0 8px}
+.hero-l{display:flex;flex-direction:column;gap:18px;min-width:0}
+.grade{align-self:flex-start;padding:6px 14px;border-radius:999px;background:var(--grape-soft);color:var(--grape);font:700 14px/1 var(--f-display);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5.4vw,60px);font-weight:800;letter-spacing:-.01em}
+.lead{font-size:19px;color:var(--ink-2);max-width:56ch}
+.cta{margin-top:6px}
+.hero-r{position:relative;min-width:0;background:var(--sun-pale);border:2px solid var(--ink);border-radius:var(--r-lg);padding:22px;box-shadow:8px 8px 0 var(--sun)}
+.hero-r .chat{gap:10px}
+.hero-r .bubble{font-size:15px}
+.hero-r .hand{position:absolute;right:18px;bottom:-34px;transform:rotate(-3deg)}
+.sec-t{font-size:clamp(24px,3vw,32px);font-weight:700;margin-top:26px}
+.learn{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.lc{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:8px}
+.lc-n{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--sun);border:2px solid var(--ink);font:700 16px/1 var(--f-display)}
+.lc h3{font-size:19px}
+.lc p{color:var(--ink-2);font-size:15.5px}
+.mats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.mat{display:flex;flex-direction:column;gap:8px;padding:20px;border-radius:var(--r);background:var(--card);border:2px solid var(--ink);color:var(--ink);text-decoration:none;transition:transform .15s ease, box-shadow .15s ease}
+.mat:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--sun)}
+.mat h3{font-size:22px}
+.mat p{color:var(--ink-2);flex:1}
+.go{font:700 13px/1 var(--f-display);text-transform:uppercase;letter-spacing:.06em;color:var(--sky)}
+.go::after{content:" →"}
+.progress{display:flex;gap:12px;align-items:center;padding:16px 18px;border-radius:var(--r);background:var(--sun-soft);margin-top:6px}
+.progress .star{width:30px;height:30px;flex:none}
+
+/* deck */
+.page.wide{gap:12px}
+.deck{display:flex;flex-direction:column;gap:16px}
+.deck:fullscreen{background:var(--bg);padding:24px max(24px,calc((100% - 1300px)/2));overflow:auto}
+.slide{position:relative;aspect-ratio:16/9;width:100%;background:var(--card);border:2px solid var(--ink);border-radius:var(--r-lg);box-shadow:8px 8px 0 var(--sun);padding:clamp(18px,3.2vw,40px) clamp(18px,3.6vw,48px) 54px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.s-kick{display:flex;justify-content:space-between;align-items:center;gap:12px;font:700 13px/1 var(--f-display);text-transform:uppercase;letter-spacing:.09em;color:var(--ink-2)}
+.s-kick>span:first-child{padding:6px 12px;border-radius:999px;background:var(--sun-soft)}
+.s-kick .school img{height:26px}
+.slide h2{font-size:clamp(24px,3.3vw,40px);font-weight:800}
+.s-body{display:flex;flex-direction:column;gap:14px;min-width:0}
+.s-content{display:flex;flex-direction:column;gap:12px;font-size:clamp(16px,1.55vw,19px);min-width:0}
+.s-content ul.big li,.s-content ol.rules li{margin:6px 0}
+.sfoot{position:absolute;left:clamp(18px,3.6vw,48px);right:clamp(18px,3.6vw,48px);bottom:16px;display:flex;justify-content:space-between;font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.hand{font:600 clamp(22px,2.2vw,28px)/1.15 var(--f-hand);color:var(--sky);display:flex;align-items:center;gap:8px;transform:rotate(-1.2deg);margin-top:auto;padding-top:4px}
+.hand svg{width:40px;height:24px;flex:none}
+.hand path{fill:none;stroke:var(--sky);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.s-title{background:var(--sun);justify-content:center;gap:20px;overflow:hidden;box-shadow:8px 8px 0 var(--ink)}
+.st-top{position:absolute;top:24px;left:clamp(18px,3.6vw,48px);right:clamp(18px,3.6vw,48px);display:flex;justify-content:space-between;align-items:center}
+.s-title .mark-ic{background:var(--card);width:46px;height:46px}
+.s-title h1{font-size:clamp(38px,7vw,88px);font-weight:800;letter-spacing:-.02em;max-width:12ch;position:relative;z-index:1}
+.s-title mark::before{background:var(--card)}
+.s-sub{font-size:clamp(17px,2vw,24px);max-width:34ch;position:relative;z-index:1;font-weight:600}
+.tchips{display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
+.tchips span{padding:7px 14px;border-radius:999px;background:var(--card);border:2px solid var(--ink);font:600 14px/1 var(--f-display)}
+.deco{position:absolute;right:clamp(14px,4vw,60px);top:18%;display:flex;flex-direction:column;gap:14px;align-items:flex-end}
+.deco span{padding:12px 18px;border-radius:20px 20px 4px 20px;background:var(--card);border:2px solid var(--ink);font:700 clamp(14px,1.6vw,20px)/1 var(--f-display);box-shadow:4px 4px 0 var(--ink)}
+.deco .d1{transform:rotate(4deg)}
+.deco .d2{transform:rotate(-3deg);margin-right:40px}
+.deco .d3{transform:rotate(2deg);background:var(--ink);color:var(--sun)}
+.navbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.navbar .mid{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;min-width:0}
+.sdots{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.sdots a{width:12px;height:12px;border-radius:50%;background:var(--line);border:1.5px solid var(--ink-3)}
+.sdots a.seen{background:var(--sun-soft);border-color:var(--sun-deep)}
+.sdots a.cur{background:var(--sun);border-color:var(--ink);transform:scale(1.25)}
+.hint{font-size:14px;color:var(--ink-2)}
+
+/* slide content blocks */
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.cards4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card h3{font-size:18px}
+.card p{font-size:15.5px;color:var(--ink-2)}
+.cards4 .card{background:var(--sun-pale);border-color:var(--sun)}
+.card.good{background:var(--mint-soft);border-color:#9ED9BE}
+.card.bad{background:var(--coral-soft);border-color:#F2B1B3}
+.card ul{display:flex;flex-direction:column;gap:4px;font-size:16px}
+.def{font-size:clamp(17px,1.7vw,21px);padding:12px 16px;border-left:5px solid var(--sun);background:var(--sun-pale);border-radius:0 12px 12px 0}
+.analogy{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 16px;align-items:start;padding:14px 16px;border:1.5px dashed var(--ink-3);border-radius:var(--r)}
+.analogy .tag{font:700 13px/1 var(--f-display);text-transform:uppercase;letter-spacing:.07em;padding:7px 10px;border-radius:8px;background:var(--grape-soft);color:var(--grape)}
+.analogy>.ws{display:grid;margin:0}
+.analogy .ws>div{font-size:16px}
+.analogy>p{grid-column:1/-1;font-size:15.5px;color:var(--ink-2)}
+.pr{background:var(--sun-soft);border-radius:8px;padding:1px 7px;font-weight:700;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.try{font-size:15px;line-height:2.1;margin-top:8px}
+.try>span:first-child{color:var(--ink-2);margin-right:4px}
+.try a{display:inline-block;line-height:1.3;font-weight:700;padding:4px 12px;margin:0 6px 0 0;border-radius:999px;border:1.5px solid var(--sky);text-decoration:none}
+.try a:hover{background:var(--sky-soft)}
+.age{font-size:15px;padding:12px 16px;border-radius:var(--r);background:var(--sky-soft);border:1.5px solid #B9CBF7}
+.lights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.light{border-radius:var(--r);padding:16px;border:2px solid var(--ink);display:flex;flex-direction:column;gap:8px;min-width:0}
+.light h3{font-size:18px;display:flex;align-items:center;gap:8px}
+.light h3::before{content:"";width:16px;height:16px;border-radius:50%;border:2px solid var(--ink);flex:none}
+.light ul{font-size:15.5px;display:flex;flex-direction:column;gap:4px}
+.light.g{background:var(--mint-soft)} .light.g h3::before{background:var(--mint-b)}
+.light.y{background:var(--sun-pale)} .light.y h3::before{background:var(--sun)}
+.light.r{background:var(--coral-soft)} .light.r h3::before{background:var(--coral-b)}
+.rules{display:flex;flex-direction:column;gap:6px;font-size:clamp(16px,1.6vw,19px)}
+.rules li::marker{font-weight:800;color:var(--sun-deep)}
+
+/* bricks */
+.bricks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.brick{border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;border:2px solid var(--ink);position:relative;min-width:0}
+.brick::before{content:"";position:absolute;top:-9px;left:16px;width:22px;height:9px;border:2px solid var(--ink);border-bottom:0;border-radius:6px 6px 0 0;background:inherit}
+.brick::after{content:"";position:absolute;top:-9px;left:46px;width:22px;height:9px;border:2px solid var(--ink);border-bottom:0;border-radius:6px 6px 0 0;background:inherit}
+.brick b{font:800 17px/1.1 var(--f-display)}
+.brick span{font-size:14px;color:var(--ink-2)}
+.brick q{font-size:15px;font-weight:700;quotes:"«" "»"}
+.b-role{background:var(--grape-soft)} .b-task{background:var(--sun-soft)} .b-ctx{background:var(--sky-soft)} .b-fmt{background:var(--mint-soft)} .b-lim{background:var(--coral-soft)}
+
+/* weak / strong */
+.ws{display:grid;grid-template-columns:minmax(0,.6fr) minmax(0,1.4fr);gap:12px;margin-bottom:10px}
+.ws>div{border-radius:14px;padding:14px 16px;font-size:16px;display:flex;flex-direction:column;gap:6px}
+.ws .weak{background:var(--coral-soft);font-weight:700;font-size:20px}
+.ws .strong{background:var(--mint-soft)}
+.ws .lbl{font:700 12px/1 var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2)}
+
+/* chat */
+.chat{display:flex;flex-direction:column;gap:8px;min-width:0}
+.bubble{max-width:92%;padding:10px 14px 11px;border-radius:18px;font-size:16px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:3px}
+.bubble .who{font:700 11px/1 var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+.bubble.me{align-self:flex-end;background:var(--sun-soft);border-radius:18px 18px 4px 18px}
+.bubble.ai{align-self:flex-start;background:var(--card);border:1.5px solid var(--line);border-radius:18px 18px 18px 4px}
+.bubble.ai.good{border-color:#9ED9BE;background:var(--mint-soft)}
+.bubble.ai.hintb{border-color:#F2B1B3;background:var(--coral-soft)}
+.bubble.wide{max-width:100%}
+.bubble.fresh{animation:pop .3s ease both}
+.typing{flex-direction:row;gap:5px;padding:14px 16px}
+.typing i{width:8px;height:8px;border-radius:50%;background:var(--ink-3);animation:blink 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s} .typing i:nth-child(3){animation-delay:.3s}
+@keyframes pop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+
+/* widgets */
+.w{display:flex;flex-direction:column;gap:10px;min-width:0}
+.w-intro{font-weight:700}
+.q{font-weight:700;font-size:17px}
+.qn{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--sun-soft);font:700 13px/1.4 var(--f-display);margin-right:4px;font-variant-numeric:tabular-nums}
+.qbox{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-bottom:1.5px dashed var(--line)}
+.qbox:last-of-type{border-bottom:0}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.opt{display:flex;align-items:flex-start;gap:10px;text-align:left;padding:11px 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:600 15.5px/1.35 var(--f-body);cursor:pointer;min-width:0}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt .k{display:inline-grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:var(--sun-soft);font:700 12px/1 var(--f-display)}
+.opt .k.box{border-radius:6px;background:var(--card);border:2px solid var(--ink-3)}
+.opt.sel{border-color:var(--sky);background:var(--sky-soft)}
+.opt.sel .k.box{background:var(--sky);border-color:var(--sky)}
+.opt.is-ok{border-color:var(--mint-b);background:var(--mint-soft)}
+.opt.is-bad{border-color:var(--coral-b);background:var(--coral-soft)}
+.opt.is-ok .k.box{background:var(--mint-b);border-color:var(--mint-b)}
+.opt.is-bad .k.box{background:var(--coral-b);border-color:var(--coral-b)}
+.opt.is-missed{border-style:dashed;border-color:var(--mint-b)}
+.opt:disabled{cursor:default;color:var(--ink)}
+.fb{font-size:15.5px;border-radius:14px}
+.fb:empty{display:none}
+.fb.ok,.fb.bad,.fb.info{padding:12px 14px}
+.fb.ok{background:var(--mint-soft);border:1.5px solid #9ED9BE}
+.fb.bad{background:var(--coral-soft);border:1.5px solid #F2B1B3}
+.fb.info{background:var(--sky-soft);border:1.5px solid #B9CBF7}
+.fb ol,.fb ul{margin-top:6px}
+.score{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:16px;border-radius:var(--r);background:var(--sun-soft);border:2px solid var(--ink)}
+.score .big{font:800 30px/1 var(--f-display)}
+.cls{display:flex;flex-direction:column;gap:10px}
+.cls-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--card);border:1.5px solid var(--line)}
+.cls-row.ok{border-color:#9ED9BE;background:#F4FBF7}
+.cls-row.bad{border-color:#F2B1B3;background:#FFF7F7}
+.cls-text{font-size:15.5px;min-width:0}
+.cls-field{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.cls-ex{grid-column:1/-1;font-size:14.5px;color:var(--ink-2)}
+.pill{padding:7px 12px;border-radius:999px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:600 13.5px/1.1 var(--f-display);cursor:pointer}
+.pill:hover:not(:disabled){border-color:var(--ink)}
+.pill[aria-pressed="true"]{border-color:var(--ink)}
+.pill.t-g[aria-pressed="true"]{background:var(--mint-soft)}
+.pill.t-y[aria-pressed="true"]{background:var(--sun-soft)}
+.pill.t-r[aria-pressed="true"]{background:var(--coral-soft)}
+.pill.t-n[aria-pressed="true"],.pill.t-task[aria-pressed="true"]{background:var(--sun-soft)}
+.pill.t-role[aria-pressed="true"]{background:var(--grape-soft)}
+.pill.t-ctx[aria-pressed="true"]{background:var(--sky-soft)}
+.pill.t-fmt[aria-pressed="true"]{background:var(--mint-soft)}
+.pill.t-lim[aria-pressed="true"]{background:var(--coral-soft)}
+.pill.right{border-style:dashed;border-color:var(--mint-b)}
+.pill:disabled{cursor:default}
+.ord{display:flex;flex-direction:column;gap:8px}
+.ord button{display:flex;gap:12px;align-items:center;text-align:left;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:600 15.5px/1.35 var(--f-body);cursor:pointer}
+.ord button:hover:not(:disabled){border-color:var(--ink)}
+.ord .no{display:inline-grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:var(--line);font:700 14px/1 var(--f-display)}
+.ord button.picked .no{background:var(--sun);border:2px solid var(--ink)}
+.ord button.ok{border-color:var(--mint-b);background:var(--mint-soft)}
+.ord button.bad{border-color:var(--coral-b);background:var(--coral-soft)}
+.ord button:disabled{cursor:default}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button{padding:8px 14px;border-radius:999px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:600 14px/1 var(--f-display);cursor:pointer}
+.tabs button:hover{border-color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.tabpanel{padding-top:6px;min-width:0}
+.prompt{position:relative;border:2px dashed var(--ink-3);border-radius:16px;padding:22px 16px 14px;background:var(--card);font-size:16px;white-space:pre-wrap;overflow-wrap:anywhere;min-width:0}
+.plbl{position:absolute;top:-11px;left:14px;padding:3px 10px;border-radius:999px;background:var(--ink);color:var(--card);font:700 11px/1.2 var(--f-display);text-transform:uppercase;letter-spacing:.08em}
+.copybox .row{margin-top:10px}
+.copy-ok{font-size:14px;color:var(--mint);font-weight:700}
+.flips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.flip{min-height:112px;display:flex;flex-direction:column;justify-content:space-between;gap:8px;text-align:left;padding:14px;border-radius:16px;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:600 15.5px/1.35 var(--f-body);cursor:pointer;box-shadow:3px 3px 0 var(--sun)}
+.flip .ft{font:700 16px/1.25 var(--f-display)}
+.flip .fh{font-size:13px;color:var(--sky);font-weight:700}
+.flip[aria-pressed="true"]{background:var(--sun-pale)}
+.flip .fb2{font-size:15px;color:var(--ink-2);font-weight:600}
+.nw-sent{font:700 clamp(19px,2vw,24px)/1.3 var(--f-display)}
+.nw-new{background:var(--sun-soft);border-radius:6px;padding:0 4px}
+.caret{display:inline-block;width:3px;height:1em;background:var(--ink);vertical-align:-.12em;animation:blink 1s infinite}
+.nw-opts{display:flex;flex-direction:column;gap:6px}
+.nw-opt{display:grid;grid-template-columns:minmax(110px,180px) minmax(0,1fr) 56px;gap:12px;align-items:center;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:700 15px/1.2 var(--f-body);cursor:pointer;text-align:left}
+.nw-opt:hover{border-color:var(--ink)}
+.nw-opt .bar{height:12px;border-radius:999px;background:var(--sun-pale);overflow:hidden}
+.nw-opt .bar span{display:block;height:100%;background:var(--sun);border-radius:999px}
+.nw-opt.odd .bar span{background:var(--coral-b)}
+.nw-p{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.cmp2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.cmp-col{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--r);background:var(--sun-pale);min-width:0}
+.cmp-col .btn{align-self:flex-start}
+.cmp-lbl{font:700 13px/1 var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2)}
+.cmp-col .bubble{font-size:15px}
+.bld{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.bld-l,.bld-r{display:flex;flex-direction:column;gap:10px;min-width:0}
+.ing{display:flex;flex-wrap:wrap;gap:8px}
+.ingb{padding:8px 14px;border-radius:12px;border:2px solid var(--ink);font:700 14px/1 var(--f-display);color:var(--ink);cursor:pointer;opacity:.5;box-shadow:none;text-decoration:line-through}
+.ingb[aria-pressed="true"]{opacity:1;text-decoration:none;box-shadow:0 3px 0 var(--ink)}
+.ingb.b-role{background:var(--grape-soft)} .ingb.b-task{background:var(--sun-soft)} .ingb.b-ctx{background:var(--sky-soft)} .ingb.b-fmt{background:var(--mint-soft)} .ingb.b-lim{background:var(--coral-soft)}
+.ptext .pl{border-radius:6px;padding:1px 3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.meter{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:15px}
+.stars5{display:inline-flex;gap:3px}
+.stars5 .star path{fill:var(--line);stroke:var(--ink-3)}
+.stars5 .on .star path{fill:var(--sun);stroke:var(--ink)}
+.stp{display:flex;flex-direction:column;gap:10px}
+.task-card{position:relative;padding:22px 16px 14px;border-radius:16px;background:var(--sun-pale);border:2px solid var(--ink);font-weight:700}
+.stp-list{display:flex;flex-direction:column;gap:6px;padding-left:1.4em}
+.stp-list li{padding:6px 10px;border-radius:10px;background:var(--card);border:1.5px solid var(--line)}
+.stp-list li.fresh{animation:pop .3s ease both}
+.tutor{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--r);background:var(--sun-pale)}
+.tutor .chat{max-height:380px;overflow-y:auto;padding-right:4px;scroll-behavior:smooth}
+.tut-opts{display:flex;flex-wrap:wrap;gap:8px}
+.tut-opts .opt{flex:1 1 200px}
+.ftxt{font-size:16.5px;line-height:1.9;white-space:normal}
+.sent{display:inline;font:inherit;color:inherit;background:none;border:0;padding:2px 3px;border-radius:6px;cursor:pointer;text-align:left;border-bottom:2px dotted var(--ink-3);box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.sent:hover:not(:disabled){background:var(--sun-pale)}
+.sent[aria-pressed="true"]{background:var(--sun-soft);border-bottom:2px solid var(--sun-deep)}
+.sent.hit{background:var(--mint-soft);border-bottom:2px solid var(--mint-b)}
+.sent.missed{background:var(--coral-soft);border-bottom:2px dashed var(--coral-b)}
+.sent.false{background:var(--line);text-decoration:line-through}
+.sent:disabled{cursor:default}
+.ft-ex{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.ft-ex li.okli{color:var(--ink-2)}
+textarea{width:100%;min-height:96px;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:500 16px/1.5 var(--f-body);resize:vertical}
+textarea:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px var(--sky-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 11px;border-radius:999px;font:700 13px/1 var(--f-display);border:2px solid var(--line);background:var(--card)!important;color:var(--ink-3)}
+.chip.on{border-color:var(--ink);color:var(--ink)}
+.chip.on.b-role{background:var(--grape-soft)!important} .chip.on.b-task{background:var(--sun-soft)!important} .chip.on.b-ctx{background:var(--sky-soft)!important} .chip.on.b-fmt{background:var(--mint-soft)!important} .chip.on.b-lim{background:var(--coral-soft)!important}
+.sample{position:relative;padding:22px 16px 14px;border-radius:16px;background:var(--mint-soft);border:1.5px solid #9ED9BE}
+.wlabel{display:flex;flex-direction:column;gap:6px;font-weight:700}
+
+/* how AI works: tokens, temperature, meaning map */
+.flds{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);gap:10px 12px}
+.flds label{display:flex;flex-direction:column;gap:4px;font:600 13px/1.2 var(--f-display);color:var(--ink-2);min-width:0}
+.flds input{width:100%;min-width:0;min-height:42px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:600 16px/1.2 var(--f-body)}
+.flds input:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px var(--sky-soft)}
+.toks{display:flex;flex-wrap:wrap;gap:4px;padding:14px;border-radius:16px;background:var(--card);border:2px dashed var(--ink-3);font:600 20px/1.2 var(--f-body)}
+.tk{padding:4px 2px;border-radius:6px;white-space:pre;border-bottom:3px solid transparent}
+.tk.t0{background:var(--sun-soft);border-color:var(--sun)}
+.tk.t1{background:var(--sky-soft);border-color:#8FAEF2}
+.tk.t2{background:var(--mint-soft);border-color:#7FD0AB}
+.tk.t3{background:var(--grape-soft);border-color:#B6A3F5}
+.tok-cnt{font-size:16px;font-variant-numeric:tabular-nums}
+.tok-cmp{display:flex;flex-direction:column;gap:6px}
+.tc-row{display:grid;grid-template-columns:120px minmax(0,1fr) 36px;gap:10px;align-items:center;font-weight:700}
+.tc-row .bar{height:14px;border-radius:999px;background:var(--sun-pale);overflow:hidden}
+.tc-row .bar span{display:block;height:100%;background:var(--sun);border-radius:999px}
+.tc-row b{text-align:right;font-variant-numeric:tabular-nums}
+.temp{display:flex;flex-direction:column;gap:10px}
+.temp-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;font:700 15px/1.2 var(--f-display)}
+.temp-ctl input[type=range]{flex:1 1 220px;accent-color:var(--sun-deep);min-width:0}
+.temp-val{font:700 15px/1.2 var(--f-body);color:var(--ink-2);flex:1 1 100%}
+.nw-opt.static{cursor:default}
+.nw-opt.static:hover{border-color:var(--line)}
+.gen{display:flex;flex-wrap:wrap;gap:6px}
+.gen:empty{display:none}
+.gen span{padding:6px 12px;border-radius:999px;background:var(--sun-soft);font-weight:700;font-size:15px;animation:pop .25s ease both}
+.gen span.odd{background:var(--coral-soft);color:var(--coral)}
+.mm{display:flex;flex-direction:column;gap:10px}
+.mm-wrap{overflow-x:auto;border-radius:16px;border:1.5px solid var(--line);background:var(--card);max-width:720px;width:100%}
+.mm-hint{display:none}
+.mm-svg{display:block;width:100%;min-width:500px;height:auto}
+.mm-zone{stroke-width:1.5}
+.z-sun{fill:var(--sun-pale);stroke:var(--sun)} .z-mint{fill:#F1FAF5;stroke:#9ED9BE} .z-coral{fill:#FFF5F5;stroke:#F2B1B3} .z-sky{fill:#F2F6FF;stroke:#B9CBF7}
+.mm-glbl{font:700 12px/1 var(--f-display);letter-spacing:.08em;fill:var(--ink-2)}
+.mm-lines line{stroke:var(--sky);stroke-width:2.5;stroke-dasharray:6 5;stroke-linecap:round}
+.mm-pt{cursor:pointer;outline:none}
+.mm-pt circle{fill:var(--ink);stroke:var(--card);stroke-width:2}
+.mm-pt text{font:600 17px/1 var(--f-body);fill:var(--ink)}
+.mm-pt:hover text,.mm-pt:focus-visible text{fill:var(--sky)}
+.mm-pt:focus-visible circle{stroke:var(--sky);stroke-width:4}
+.mm-pt.nb circle{fill:var(--sky)}
+.mm-pt.nb text{fill:var(--sky);font-weight:800}
+.mm-pt.cur circle{fill:var(--sun);stroke:var(--ink);stroke-width:2.5}
+.mm-pt.cur text{font-weight:800}
+.mm-pt.fresh circle{fill:var(--coral-b)}
+.mm-info{font-size:15.5px;min-height:1.5em}
+.mm-q{display:flex;flex-direction:column;gap:4px}
+.mm-q .row{margin-top:6px}
+
+/* workbook */
+.book{position:relative;background-color:var(--card);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;border:1.5px solid var(--line);border-radius:var(--r);padding:28px 28px 32px 64px;display:flex;flex-direction:column;gap:20px}
+.book::before{content:"";position:absolute;top:0;bottom:0;left:44px;width:2px;background:var(--margin)}
+.bhead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.btitle{font:700 13px/1 var(--f-display);text-transform:uppercase;letter-spacing:.1em;color:var(--ink-2);margin-bottom:8px}
+.book h1{font-size:clamp(28px,4vw,42px);font-weight:800}
+.who{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:12px}
+.who label{display:flex;flex-direction:column;gap:4px;font:600 13px/1 var(--f-display);color:var(--ink-2)}
+.who input{width:100%;min-width:0;min-height:42px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:600 16px/1.2 var(--f-body)}
+.who input:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px var(--sky-soft)}
+.notes{padding:16px 18px;border-radius:var(--r);background:var(--sun-soft);border:2px solid var(--ink);display:flex;flex-direction:column;gap:8px}
+.notes h2{font-size:20px}
+.notes ul{display:flex;flex-direction:column;gap:4px}
+.task{background:rgba(255,255,255,.94);border:1.5px solid var(--line);border-radius:var(--r);padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.task h2{font-size:21px;display:flex;align-items:center;gap:10px}
+.tn{display:inline-grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:var(--sun);border:2px solid var(--ink);font:800 16px/1 var(--f-display)}
+.task-text{display:flex;flex-direction:column;gap:8px}
+.task.hw{border:2px solid var(--ink);background:var(--sun-pale)}
+.task.hw ol{display:flex;flex-direction:column;gap:4px}
+
+/* certificate */
+.cert{margin-top:8px;position:relative;text-align:center;padding:34px 22px 26px;border-radius:var(--r-lg);background:var(--sun);border:2px solid var(--ink);box-shadow:8px 8px 0 var(--ink);display:flex;flex-direction:column;align-items:center;gap:8px;animation:pop .4s ease both}
+.cert-badge{width:74px;height:74px;border-radius:50%;background:var(--card);border:2px solid var(--ink);display:grid;place-items:center}
+.cert-badge .star{width:46px;height:46px}
+.cert-k{font:700 13px/1 var(--f-display);text-transform:uppercase;letter-spacing:.14em}
+.cert h2{font-size:clamp(28px,4vw,44px);font-weight:800}
+.cert-name{font:700 clamp(26px,3vw,34px)/1.1 var(--f-hand);padding:2px 18px;border-bottom:2px solid var(--ink);margin-top:4px}
+.cert-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;margin-top:6px;font-size:15px}
+
+/* responsive */
+@media (max-width:980px){
+  .slide{aspect-ratio:auto;min-height:0}
+  .bricks{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cards4,.learn{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .flips{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .deco{display:none}
+  .s-title{padding-top:90px;padding-bottom:40px}
+}
+@media (max-width:760px){
+  body{font-size:16px}
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .hero-r .hand{position:static;margin-top:12px}
+  .mats,.cols2,.lights,.cmp2,.bld,.opts{grid-template-columns:minmax(0,1fr)}
+  .ws{grid-template-columns:minmax(0,1fr)}
+  .bricks{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cls-row{grid-template-columns:minmax(0,1fr)}
+  .cls-field{justify-content:flex-start}
+  .who{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .who label:first-child{grid-column:1/-1}
+  .flds{grid-template-columns:minmax(0,1fr)}
+  .mm-hint{display:block}
+  .tc-row{grid-template-columns:96px minmax(0,1fr) 30px}
+  .book{padding:20px 16px 24px 34px}
+  .book::before{left:20px}
+  .slide{padding:18px 16px 50px;box-shadow:5px 5px 0 var(--sun);border-radius:22px}
+  .s-title{box-shadow:5px 5px 0 var(--ink);padding-top:84px}
+  .sfoot{left:16px;right:16px}
+  .tnav{order:3;width:100%;margin-left:0;overflow-x:auto;flex-wrap:nowrap}
+  .tnav a{white-space:nowrap}
+  .starpill{margin-left:auto}
+  .analogy{grid-template-columns:minmax(0,1fr)}
+  .nw-opt{grid-template-columns:minmax(0,1fr) 52px}
+  .nw-opt .bar{grid-column:1/-1;grid-row:2}
+  .navbar .mid{order:3;flex-basis:100%}
+}
+@media (max-width:460px){
+  .cards4,.learn,.flips,.bricks{grid-template-columns:minmax(0,1fr)}
+  .btn.big{width:100%}
+  .navbar .btn{flex:1}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+@media print{
+  .top,.foot,.navbar,.toast,.row .btn,.hint.center{display:none!important}
+  .book{border:0;padding-left:40px}
+  .task{break-inside:avoid}
+}
+
+</style>
+</head>
+<body>
+<script>
+/* =====================================================================
+   НАЛАШТУВАННЯ (необов’язково)
+   SCHOOL_NAME — назва школи чи гуртка: з’явиться в шапці, на слайдах,
+                 у зошиті й унизу сторінки.
+   LOGO_URL    — шлях до логотипа, наприклад 'logo.png' (файл покласти
+                 поруч з index.html). Якщо логотип задано, назва
+                 показується як підпис до нього.
+   Порожні лапки '' — нічого не показувати.
+   ===================================================================== */
+window.LESSON_CONFIG = {
+  SCHOOL_NAME: '',
+  LOGO_URL: ''
+};
+</script>
+<script>
+/* ==========================================================================
+   ЗМІСТ ЗАНЯТТЯ: слайди, робочий зошит, фінальний тест.
+   Текст можна редагувати тут. Апостроф у словах — ’ (не ').
+   ========================================================================== */
+(function(){
+var AI = [
+  ['ChatGPT', 'https://chatgpt.com/'],
+  ['Gemini', 'https://gemini.google.com/'],
+  ['Copilot', 'https://copilot.microsoft.com/']
+];
+var TRY = function(t){ return '<p class="try"><span>' + (t || 'Спробуй у ШІ-чаті (з дозволу батьків):') + '</span> ' + AI.map(function(a){ return '<a href="' + a[1] + '" target="_blank" rel="noopener noreferrer">' + a[0] + '</a>'; }).join(' ') + '</p>'; };
+var WIKI_SH = 'https://uk.wikipedia.org/wiki/%D0%A2%D0%B0%D1%80%D0%B0%D1%81_%D0%93%D1%80%D0%B8%D0%B3%D0%BE%D1%80%D0%BE%D0%B2%D0%B8%D1%87_%D0%A8%D0%B5%D0%B2%D1%87%D0%B5%D0%BD%D0%BA%D0%BE';
+var BR = {
+  role:  ['Роль', 'Ким має бути ШІ?'],
+  task:  ['Завдання', 'Що треба зробити?'],
+  ctx:   ['Контекст', 'Хто ти і навіщо тобі це?'],
+  fmt:   ['Формат', 'Як має виглядати відповідь?'],
+  lim:   ['Обмеження', 'Чого не треба робити?']
+};
+var brick = function(k, ex){ return '<div class="brick b-' + k + '"><b>' + BR[k][0] + '</b><span>' + BR[k][1] + '</span>' + (ex ? '<q>' + ex + '</q>' : '') + '</div>'; };
+var bub = function(who, t){ return '<div class="bubble ' + (who === 'me' ? 'me' : 'ai') + '"><span class="who">' + (who === 'me' ? 'Ти' : 'ШІ') + '</span>' + t + '</div>'; };
+
+window.LESSON = {
+  title: 'Промпт-лабораторія',
+  subtitle: 'Як ставити штучному інтелекту запитання, щоб він допомагав вчитися, а не робив усе замість тебе',
+  links: {ai: AI},
+
+  /* ---------------- ПРЕЗЕНТАЦІЯ ---------------- */
+  slides: [
+    { kind: 'title', t: 'Промпт-<mark>лабораторія</mark>',
+      sub: 'Як ставити штучному інтелекту запитання, щоб він допомагав вчитися, а не робив усе замість тебе',
+      chips: ['Презентація + робочий зошит', 'Зірки за кожне завдання'] },
+
+    { sec: 'Розминка', t: 'Почнемо з експерименту',
+      h: '<p>Двоє учнів пишуть ШІ-чату про одну й ту саму тему. Надішли обидва повідомлення й порівняй, хто отримав кориснішу відповідь.</p>',
+      demo: { type: 'compare', id: 's-compare',
+        a: { label: 'Учень 1', prompt: 'Поясни площу трикутника',
+             answer: 'Площа трикутника — це міра частини площини, обмеженої трьома відрізками. Існує багато способів її знайти: через основу й висоту, за формулою Герона, через дві сторони і синус кута між ними, через радіус вписаного чи описаного кола, через координати вершин… (і так ще пів сторінки)' },
+        b: { label: 'Учень 2', prompt: 'Я у 8 класі. Поясни по кроках, як знайти площу трикутника, якщо основа 6 см, а висота 4 см. І дай одну схожу задачу, щоб я потренувався.',
+             answer: '1) Площа трикутника — половина добутку основи на висоту: S = ½ · a · h.\n2) Підставляємо: S = ½ · 6 · 4.\n3) 6 · 4 = 24, половина від 24 — це 12.\nВідповідь: 12 см².\n\nСпробуй сам: основа 10 см, висота 5 см. Яка площа?' },
+        after: 'Той самий ШІ, та сама тема. Різниця лише в запитанні: другий учень сказав, у якому він класі, що саме треба і в якому вигляді.' },
+      hand: 'Запам’ятай цей момент — усе заняття про нього' },
+
+    { sec: 'Як працює ШІ', t: 'Як «думає» ШІ-чат',
+      h: '<ul class="big"><li>ChatGPT, Gemini, Copilot, Claude — це <b>мовні моделі</b>. Вони «прочитали» величезну кількість текстів і навчилися передбачати, яке слово найімовірніше буде далі.</li><li>Відповідь складається слово за словом — як підказки на клавіатурі телефона, тільки набагато розумніші.</li></ul><p class="small">Обери наступне слово так, як це зробив би ШІ. Відсотки показують, наскільки ймовірне кожне слово.</p>',
+      demo: { type: 'nextword', id: 's-nextword', start: 'Перед контрольною найкраще',
+        nodes: {
+          root: { opts: [ {w:'повторити', p:41, next:'a'}, {w:'виспатися', p:23}, {w:'розв’язати', p:19, next:'c'}, {w:'з’їсти', p:0.3, next:'d', odd:true} ], rest: 16.7 },
+          a: { opts: [ {w:'правила', p:38}, {w:'теорію', p:27}, {w:'конспект', p:19}, {w:'мультики', p:0.2, odd:true} ], rest: 15.8 },
+          c: { opts: [ {w:'кілька задач', p:46}, {w:'старі тести', p:21}, {w:'приклади з підручника', p:18}, {w:'кросворд', p:0.4, odd:true} ], rest: 14.6 },
+          d: { opts: [ {w:'шоколадку', p:52}, {w:'яблуко', p:31}, {w:'підручник', p:0.1, odd:true} ], rest: 16.9 }
+        },
+        endText: 'Так ШІ і пише: слово за словом обирає ймовірне продовження. Він не перевіряє, чи це правда, — лише чи це звучить правдоподібно.',
+        oddText: 'Малоймовірне слово теж іноді трапляється, і тоді відповідь виходить дивною. Саме тому ШІ часом упевнено пише дурниці.' } },
+
+    { sec: 'Як працює ШІ', t: 'Токени: як ШІ бачить слова',
+      h: '<p>ШІ читає текст не літерами і не цілими словами, а шматочками — <b>токенами</b>. Як конструктор: часте слово — одна деталь, рідкісне збирається з кількох.</p><p class="small">Нижче — справжній поділ на токени для моделі GPT-4o. Перемикай вкладки.</p>',
+      demo: { type: 'tokens', id: 's-tokens', sets: [
+        { label: 'Українською', cmp: true, text: 'Сьогодні на уроці ми вивчали фотосинтез.',
+          tokens: ['С','ь','огодні',' на',' у','ро','ці',' ми',' в','ив','ч','али',' фот','ос','ин','т','ез','.'],
+          note: 'Українські слова ШІ часто ріже на дрібні шматочки.' },
+        { label: 'English', cmp: true, text: 'Today in class we studied photosynthesis.',
+          tokens: ['Today',' in',' class',' we',' studied',' photos','ynthesis','.'],
+          note: 'Те саме речення англійською — більш ніж удвічі менше токенів: англійських текстів ШІ «прочитав» найбільше.' },
+        { label: 'Числа', text: '123456789 × 987654321',
+          tokens: ['123','456','789',' ×',' ','987','654','321'],
+          note: 'Довгі числа ріжуться по три цифри. Тому великі обчислення «в голові» для ШІ ризиковані — перевіряй на калькуляторі.' },
+        { label: 'Слово «молоко»', text: 'молоко',
+          tokens: ['м','ол','око'],
+          note: 'Для ШІ «молоко» — це «м» + «ол» + «око». Окремих літер він не бачить, тому на запитання «скільки літер „о“ у слові „молоко“» може помилитися. Правильно — 3.' }
+      ] },
+      after: '<p class="try"><span>Перевір сам:</span> <a href="https://platform.openai.com/tokenizer" target="_blank" rel="noopener noreferrer">Токенайзер OpenAI</a> — обери GPT-4o і встав будь-яке речення.</p>' },
+
+    { sec: 'Як працює ШІ', t: 'Температура: скільки фантазії',
+      h: '<p>Пам’ятаєш, ШІ обирає наступне слово з кількох варіантів? <b>Температура</b> — налаштування, яке каже, наскільки сміливо обирати.</p><ul><li><b>Низька</b> — майже завжди найімовірніше слово. Відповіді передбачувані й однакові.</li><li><b>Висока</b> — частіше несподівані слова. Відповіді різні, але бувають дивними.</li></ul><p class="small">Посунь повзунок і натисни «Згенерувати». Зірка — коли спробуєш і низьку, і високу температуру.</p>',
+      demo: { type: 'temperature', id: 's-temp', prefix: 'Улітку я найбільше люблю',
+        words: ['плавати', 'гуляти з друзями', 'читати', 'кататися на велосипеді', 'спати до обіду', 'літати на драконі'],
+        logits: [3, 2.6, 2, 1.8, 1.2, -1], odd: 5,
+        presets: [ { label: 'Низька 0,2', t: 0.2 }, { label: 'Звичайна 1,0', t: 1 }, { label: 'Висока 2,0', t: 2 } ] },
+      after: '<div class="age">Для задач і фактів краще низька температура, для ідей і віршів — вища. У звичайному чаті повзунка немає — його налаштовують розробники. Але попросити більше чи менше фантазії можна словами: <span class="pr">«Дай 5 дуже різних, несподіваних варіантів»</span> або <span class="pr">«Відповідай точно, без фантазій»</span>.</div>' },
+
+    { sec: 'Як працює ШІ', t: 'Ембединги: карта значень',
+      h: '<p>Щоб «розуміти» зміст, ШІ перетворює кожне слово на набір чисел — <b>ембединг</b> (англ. <i>embedding</i>). Це ніби адреса слова на величезній карті: слова зі схожим значенням живуть по сусідству.</p><p class="small">Тому ШІ розуміє запит, навіть якщо ти написав інакшими словами: «учитель» і «педагог» на карті поруч.</p>',
+      demo: { type: 'meaningmap', id: 's-embed',
+        groups: [
+          { name: 'Шкільні предмети', x: 8, y: 8, w: 284, h: 172, tone: 'sun' },
+          { name: 'Тварини', x: 308, y: 8, w: 284, h: 172, tone: 'mint' },
+          { name: 'Їжа', x: 8, y: 192, w: 284, h: 160, tone: 'coral' },
+          { name: 'Люди в школі', x: 308, y: 192, w: 284, h: 160, tone: 'sky' }
+        ],
+        points: [
+          { w: 'математика', x: 30, y: 70 }, { w: 'фізика', x: 160, y: 60 }, { w: 'історія', x: 175, y: 120 }, { w: 'географія', x: 140, y: 155 },
+          { w: 'кіт', x: 330, y: 70 }, { w: 'собака', x: 440, y: 60 }, { w: 'кролик', x: 345, y: 125 }, { w: 'хом’як', x: 455, y: 120 },
+          { w: 'піца', x: 30, y: 250 }, { w: 'борщ', x: 150, y: 240 }, { w: 'яблуко', x: 40, y: 310 }, { w: 'морозиво', x: 165, y: 300 },
+          { w: 'учитель', x: 330, y: 245 }, { w: 'учень', x: 455, y: 240 }, { w: 'директор', x: 345, y: 322 }, { w: 'однокласник', x: 455, y: 300 }
+        ],
+        mystery: [
+          { w: 'алгебра', g: 0, x: 30, y: 100 },
+          { w: 'папуга', g: 1, x: 400, y: 160 },
+          { w: 'вареники', g: 2, x: 120, y: 268 },
+          { w: 'педагог', g: 3, x: 345, y: 272 }
+        ] },
+      after: '<p class="try"><span>Подивись на справжню карту:</span> <a href="https://projector.tensorflow.org/" target="_blank" rel="noopener noreferrer">Embedding Projector</a> — праворуч у полі <b>Search</b> введи англійське слово (наприклад, <i>school</i> або <i>music</i>) і клацни на знайдену точку: з’явиться список найближчих сусідів.</p><p class="small">Справжні ембединги — це сотні чисел для кожного слова. На екрані карту «стискають» до 2–3 вимірів, як глобус на пласку мапу.</p>' },
+
+    { sec: 'Як працює ШІ', t: 'ШІ може помилятися. І впевнено',
+      h: '<div class="cols2"><div class="card good"><h3>Що ШІ робить добре</h3><ul><li>пояснює простими словами;</li><li>наводить приклади й порівняння;</li><li>складає план, тест для самоперевірки;</li><li>скорочує, перефразовує, перекладає.</li></ul></div><div class="card bad"><h3>Де ШІ часто помиляється</h3><ul><li>дати, імена, цитати;</li><li>посилання на книжки й сайти — може їх вигадати;</li><li>довгі обчислення;</li><li>свіжі новини — може про них не знати.</li></ul></div></div>',
+      hand: 'Вигадку, яку ШІ подає як факт, називають «галюцинацією»' },
+
+    { sec: 'Що таке промпт', t: 'Що таке промпт',
+      h: '<p class="def"><b>Промпт</b> (англ. <i>prompt</i> — підказка, спонука) — це текст, яким ти ставиш завдання ШІ: запитання, прохання чи інструкція.</p><p class="def"><b>Промпт-інженерія</b> — уміння складати такі запити, щоб отримати корисну, точну й безпечну відповідь з першого-другого разу.</p><div class="analogy"><span class="tag">Як у таксі</span><div class="ws"><div class="weak"><span class="lbl">Так собі</span>«Відвезіть мене кудись»</div><div class="strong"><span class="lbl">Так краще</span>«До головного входу школи на вулиці Шкільній, 5. Мені треба бути там до 8:20»</div></div><p>Водій, як і ШІ, не читає думок. Що точніше скажеш, то швидше приїдеш куди треба.</p></div>',
+      demo: { type: 'mcq', id: 's-what', q: 'Що з цього — промпт?',
+        options: ['Кнопка «Надіслати» в чаті', 'Текст, яким ти ставиш завдання ШІ', 'Назва компанії, що створила ШІ', 'Відповідь, яку дає ШІ'], correct: 1,
+        explain: 'Промпт — це твоє повідомлення-завдання. Від нього залежить, що відповість ШІ.' } },
+
+    { sec: 'Що таке промпт', t: 'Навіщо вміти писати промпти',
+      h: '<div class="cards4"><div class="card"><h3>Менше часу</h3><p>Не треба п’ять разів перепитувати — потрібна відповідь приходить одразу.</p></div><div class="card"><h3>Відповідь під тебе</h3><p>Твій клас, твоя тема, твій рівень — і пояснення стає зрозумілим.</p></div><div class="card"><h3>Вчишся сам</h3><p>Можна попросити не давати готову відповідь, а підказувати, як репетитор.</p></div><div class="card"><h3>Навичка на майбутнє</h3><p>Так із ШІ працюють програмісти, лікарі, дизайнери, журналісти.</p></div></div>',
+      hand: 'Добре запитання — половина відповіді' },
+
+    { sec: 'Що таке промпт', t: 'Слабкий і сильний промпт',
+      h: '<p>Подивись, що змінюється, коли до запиту додають подробиці. Перемикай предмети.</p>',
+      demo: { type: 'tabs', id: 's-weakstrong', tabs: [
+        { label: 'Математика', html: '<div class="ws"><div class="weak"><span class="lbl">Слабкий</span>Дужки</div><div class="strong"><span class="lbl">Сильний</span>Я в 7 класі. Не розумію, як розкривати дужки, коли перед ними мінус. Поясни по кроках на прикладі 5 − (2x − 3) і дай 3 приклади для тренування без відповідей.</div></div><p class="small"><b>Що додали:</b> клас, що саме незрозуміло, конкретний приклад, формат «по кроках», завдання для тренування.</p>' },
+        { label: 'Українська', html: '<div class="ws"><div class="weak"><span class="lbl">Слабкий</span>Перевір текст</div><div class="strong"><span class="lbl">Сильний</span>Ось мій твір-опис осіннього парку (7 клас). Знайди орфографічні й пунктуаційні помилки, але не виправляй їх: випиши кожне речення з помилкою і назви правило, щоб я виправив сам.</div></div><p class="small"><b>Що додали:</b> який це текст і для якого класу, що саме перевірити, обмеження «не виправляй за мене».</p>' },
+        { label: 'Англійська', html: '<div class="ws"><div class="weak"><span class="lbl">Слабкий</span>Англійські слова</div><div class="strong"><span class="lbl">Сильний</span>Я у 8 класі, рівень A2. Склади 10 слів на тему «Подорожі» з перекладом і прикладом речення. Подай таблицею. Потім влаштуй мені міні-тест: показуй українське слово, а я писатиму англійське.</div></div><p class="small"><b>Що додали:</b> рівень, тему, кількість, формат таблиці, тренування після пояснення.</p>' },
+        { label: 'Історія', html: '<div class="ws"><div class="weak"><span class="lbl">Слабкий</span>Козаки</div><div class="strong"><span class="lbl">Сильний</span>Я у 8 класі, вивчаємо тему «Запорозька Січ». Склади план відповіді з 5 пунктів: виникнення, устрій, військо, побут, значення. Для кожного пункту — 1–2 речення. Познач дати, які варто перевірити в підручнику.</div></div><p class="small"><b>Що додали:</b> тему уроку, структуру відповіді, обсяг, нагадування перевірити дати.</p>' }
+      ] } },
+
+    { sec: 'Формула', t: 'Формула: 5 цеглинок промпту',
+      h: '<div class="bricks">' + brick('role', 'Ти — терплячий репетитор з біології.') + brick('task', 'Поясни, що таке фотосинтез.') + brick('ctx', 'Я в 7 класі, завтра опитування.') + brick('fmt', '5 коротких речень і одне порівняння з життя.') + brick('lim', 'Без складних термінів, до 80 слів.') + '</div><div class="prompt"><span class="plbl">Разом</span>Ти — терплячий репетитор з біології. Поясни, що таке фотосинтез. Я в 7 класі, завтра опитування. Відповідь — 5 коротких речень і одне порівняння з життя. Без складних термінів, до 80 слів.</div>',
+      hand: 'Обов’язкова лише одна цеглинка — Завдання. Решта роблять відповідь кращою' },
+
+    { sec: 'Формула', t: 'Збери промпт сам',
+      h: '<p>Вмикай і вимикай цеглинки — і дивись, як змінюється відповідь ШІ. Зірка буде, коли ввімкнеш усі п’ять.</p>',
+      demo: { type: 'builder', id: 's-builder',
+        parts: [
+          { k: 'role', line: 'Ти — терплячий репетитор з біології.' },
+          { k: 'task', line: 'Поясни, що таке фотосинтез.' },
+          { k: 'ctx',  line: 'Я в 7 класі, завтра опитування.' },
+          { k: 'fmt',  line: 'Відповідь — 5 коротких речень і одне порівняння з життя.' },
+          { k: 'lim',  line: 'Без складних термінів, до 80 слів.' }
+        ],
+        answers: {
+          none: 'Привіт! Чим можу допомогти?',
+          hard: 'Фотосинтез — це процес утворення органічних речовин з вуглекислого газу та води на світлі за участю хлорофілу. Він відбувається в хлоропластах і має світлову та темнову фази. У світловій фазі енергія світла йде на синтез АТФ і НАДФ·Н, відбувається фотоліз води з виділенням кисню. У темновій фазі (цикл Кальвіна) відбувається фіксація CO₂ і синтез глюкози…',
+          hardFmt: '1. Фотосинтез — синтез органічних речовин з CO₂ і H₂O на світлі.\n2. Відбувається в хлоропластах за участю хлорофілу.\n3. Світлова фаза: фотоліз води, синтез АТФ і НАДФ·Н, виділення O₂.\n4. Темнова фаза: цикл Кальвіна, фіксація CO₂.\n5. Сумарне рівняння: 6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂.\nПорівняння: як фабрика з конвеєром.',
+          easy: 'Фотосинтез — це спосіб, яким рослини самі готують собі їжу. Листки вбирають сонячне світло, з повітря беруть вуглекислий газ, а з ґрунту — воду. З цього рослина робить цукор, яким живиться, а в повітря віддає кисень. Тому без рослин нам не було б чим дихати.',
+          easyFmt: '1. Фотосинтез — це те, як рослина сама готує собі їжу.\n2. Для цього їй потрібні сонячне світло, вода й вуглекислий газ з повітря.\n3. Усе це відбувається в зелених листках.\n4. Рослина отримує цукор — свою «їжу».\n5. А в повітря віддає кисень, яким дихаємо ми.\nПорівняння з життя: листок — як маленька кухня на сонячній батареї.',
+          rolePre: 'Гарне запитання! Пояснюю.\n\n',
+          rolePost: '\n\nПеревір себе: що рослина віддає в повітря під час фотосинтезу?'
+        } } },
+
+    { sec: 'Прийоми', t: 'Прийом 1. Покажи зразок',
+      h: '<p>Якщо відповідь потрібна в певному вигляді, найпростіше — показати приклад. ШІ повторить форму.</p><div class="chat">' + bub('me', 'Зроби картки для слів brave, curious, honest за зразком:\n<b>ancient — давній — The castle is very ancient.</b>') + bub('ai', 'brave — сміливий — The firefighter was very brave.\ncurious — допитливий — My little brother is very curious.\nhonest — чесний — Always be honest with your friends.') + '</div><p class="small">Запит без прикладів називають <b>zero-shot</b>, із прикладами — <b>few-shot</b> (англ. shot — спроба, приклад).</p>',
+      hand: 'Один зразок пояснює формат краще за десять слів' },
+
+    { sec: 'Прийоми', t: 'Прийом 2. Крок за кроком',
+      h: '<p>Коли в задачі кілька дій, допиши: <span class="pr">«Розв’язуй по кроках і поясни кожен крок»</span>. Так ШІ рідше помиляється, а ти бачиш, звідки взялася відповідь і де могла закрастися помилка.</p>',
+      demo: { type: 'steps', id: 's-steps',
+        task: 'Велосипедист їхав 1,5 год зі швидкістю 12 км/год, а потім ще 2 год зі швидкістю 15 км/год. Яку відстань він проїхав?',
+        steps: [ 'Перша ділянка: s₁ = v₁ · t₁ = 12 · 1,5 = 18 км.', 'Друга ділянка: s₂ = v₂ · t₂ = 15 · 2 = 30 км.', 'Уся відстань: s = s₁ + s₂ = 18 + 30 = 48 км.', 'Перевірка: порахували обидві ділянки, одиниці — кілометри. <b>Відповідь: 48 км.</b>' ] } },
+
+    { sec: 'Прийоми', t: 'Прийом 3. ШІ-репетитор',
+      h: '<p>Попроси ШІ не розв’язувати за тебе, а вести тебе запитаннями. Ось такий промпт:</p>',
+      demo: [
+        { type: 'copy', id: 's-tutor-copy', count: false, text: 'Будь моїм репетитором з математики. Не давай готову відповідь. Став по одному навідному запитанню, чекай моєї відповіді й кажи, де я помилився. Задача: розв’яжи рівняння 3x + 5 = 20.' },
+        { type: 'tutor', id: 's-tutor', intro: 'А тепер спробуй, як це працює. Відповідай ШІ — обирай варіант.',
+          steps: [
+            { ai: 'Розв’язуємо 3x + 5 = 20. Що зробити спочатку, щоб x залишився сам?',
+              opts: [ { t: 'Відняти 5 від обох частин', ok: true, reply: 'Так! 3x + 5 − 5 = 20 − 5, тобто 3x = 15.' },
+                      { t: 'Поділити на 3 тільки ліву частину', reply: 'Обережно: що робиш з однією частиною рівняння, те роби й з другою. І зручніше спочатку позбутися «+ 5». Спробуй ще.' },
+                      { t: 'Додати 5 до обох частин', reply: 'Тоді вийде 3x + 10 = 25 — ми віддалилися від x. Що прибере «+ 5»?' } ] },
+            { ai: 'Маємо 3x = 15. Що далі?',
+              opts: [ { t: 'x = 15 − 3 = 12', reply: '3x — це 3 · x, тобто множення. Яка дія протилежна множенню?' },
+                      { t: 'x = 15 : 3 = 5', ok: true, reply: 'Правильно, x = 5.' },
+                      { t: 'x = 15 · 3 = 45', reply: 'Перевір: 3 · 45 = 135, а не 15. Яка дія протилежна множенню?' } ] },
+            { ai: 'Як переконатися, що x = 5 — правильна відповідь?',
+              opts: [ { t: 'Підставити: 3 · 5 + 5 = 20', ok: true, reply: '20 = 20, усе сходиться. Ти розв’язав рівняння сам — я тільки ставив запитання.' },
+                      { t: 'Спитати ще раз у ШІ', reply: 'Можна, але надійніше перевірити самому. Підстав x у рівняння.' },
+                      { t: 'Ніяк, і так зрозуміло', reply: 'Перевірка забирає 10 секунд і рятує від прикрих помилок. Як її зробити?' } ] }
+          ] }
+      ] },
+
+    { sec: 'Прийоми', t: 'Прийом 4. Уточнюй',
+      h: '<p>Перша відповідь — не остання. Пиши наступні повідомлення, щоб довести відповідь до потрібної. Натискай на картки.</p>',
+      demo: { type: 'flip', id: 's-flip', cards: [
+        { f: '«Поясни простіше, як для п’ятикласника»', b: 'Менше термінів, більше прикладів з життя.' },
+        { f: '«Скороти до 3 речень»', b: 'Залишиться головне — зручно для конспекту.' },
+        { f: '«Дай ще один приклад»', b: 'Допомагає, коли перший приклад не зрозумів.' },
+        { f: '«Зроби таблицею»', b: 'Зручно порівнювати: дати, ознаки, формули.' },
+        { f: '«Перевір свою відповідь ще раз»', b: 'ШІ іноді сам знаходить свою помилку. Але остаточно перевіряєш ти.' },
+        { f: '«Де я можу це перевірити?»', b: 'ШІ підкаже, де шукати. Посилання відкривай: інколи їх вигадують.' }
+      ] } },
+
+    { sec: 'Прийоми', t: 'Прийом 5. Тренуйся з ШІ',
+      h: '<p>ШІ може стати тренажером перед контрольною: ставити запитання, перевіряти відповіді й пояснювати помилки.</p>',
+      demo: { type: 'copy', id: 's-trainer', text: 'Я у 8 класі, готуюся до контрольної з теми «Електричний струм». Став мені 5 запитань по одному — від легкого до складного. Після кожної моєї відповіді скажи, чи правильно, і коротко поясни. Наприкінці підсумуй, що мені варто повторити.', links: true },
+      hand: 'Чесна перевірка: чи зміг би ти відповісти без ШІ?' },
+
+    { sec: 'Прийоми', t: 'Шпаргалка для різних предметів',
+      h: '<p>Готові промпти: скопіюй, підстав свою тему — і пробуй.</p>',
+      demo: { type: 'tabs', id: 's-cheats', copy: true, tabs: [
+        { label: 'Математика', text: 'Я в 7 класі. Поясни, як розв’язувати задачі на відсотки, на прикладі: «Книжка коштує 200 грн, знижка 15 %. Скільки коштує книжка зі знижкою?» Поясни по кроках. Потім дай 2 схожі задачі без відповідей.' },
+        { label: 'Українська', text: 'Я у 8 класі. Поясни на 3 прикладах, коли перед «як» ставимо кому, а коли ні. Потім дай 5 речень без розділових знаків, щоб я сам розставив коми, і перевір мене.' },
+        { label: 'Література', text: 'Я в 9 класі, читаю «Енеїду» Котляревського. Не пиши твір за мене. Постав мені 5 запитань, які допоможуть самостійно скласти характеристику Енея.' },
+        { label: 'Англійська', text: 'Act as my English teacher. I’m in the 8th grade, level A2. Let’s have a short dialogue about my weekend. Ask me one question at a time and correct my mistakes after each answer.' },
+        { label: 'Історія', text: 'Я в 10 класі. Склади хронологічну таблицю головних подій Української революції 1917–1921 років: дата — подія — чому це важливо. Не більше 8 рядків. Познач дати, які варто звірити з підручником.' },
+        { label: 'Біологія', text: 'Я у 8 класі. Поясни, як працює імунітет, через порівняння з охороною в школі. 5–6 речень, без латинських термінів.' },
+        { label: 'Фізика', text: 'Я у 8 класі. Поясни, чому взимку металева ручка здається холоднішою за дерев’яну, хоча температура в них однакова. Коротко і з прикладом з життя.' },
+        { label: 'Інформатика', text: 'Я вчу Python у 7 класі. Мій код видає помилку. Не виправляй за мене: поясни, що означає помилка, і дай підказку, де шукати.\n\nprint("Привіт, " + name)\nname = input("Як тебе звати? ")' }
+      ] } },
+
+    { sec: 'Чесно і безпечно', t: 'Допомога чи списування?',
+      h: '<div class="lights"><div class="light g"><h3>Можна</h3><ul><li>пояснити тему, яку не зрозумів;</li><li>перевірити себе тестом;</li><li>скласти план підготовки;</li><li>отримати приклади для тренування.</li></ul></div><div class="light y"><h3>Якщо дозволив учитель</h3><ul><li>ідеї для проєкту чи твору;</li><li>пошук помилок у твоєму тексті — виправляєш сам;</li><li>допомога з перекладом.</li></ul><p class="small">Скажи вчителю, що користувався ШІ.</p></div><div class="light r"><h3>Не можна</h3><ul><li>здати текст від ШІ як свій;</li><li>користуватися ШІ на контрольній;</li><li>переписувати відповідь, якої не розумієш.</li></ul></div></div>',
+      hand: 'Не можеш пояснити відповідь своїми словами — значить, вона не твоя' },
+
+    { sec: 'Чесно і безпечно', t: 'Світлофор: розсортуй ситуації',
+      demo: { type: 'classify', id: 's-lights', options: ['Можна', 'Якщо дозволив учитель', 'Не можна'], tone: ['g', 'y', 'r'],
+        items: [
+          { text: 'Пропустив урок і просиш ШІ пояснити тему «Складні речення»', a: 0, why: 'ШІ тут як репетитор: пояснює, а розбираєшся ти.' },
+          { text: 'Просиш ШІ написати твір «Мій улюблений письменник» і здаєш його', a: 2, why: 'Це чужий текст, виданий за свій. Вчитель оцінює твою роботу, а не роботу ШІ.' },
+          { text: 'Просиш 5 тестових запитань з біології, щоб перевірити себе', a: 0, why: 'Самоперевірка — один із найкорисніших способів учитися з ШІ.' },
+          { text: 'Просиш ШІ знайти помилки у своєму творі, а виправляєш їх сам', a: 1, why: 'Правила в різних учителів різні. Спитай і виправляй сам — так і вчишся.' },
+          { text: 'Фотографуєш контрольну й надсилаєш ШІ під час уроку', a: 2, why: 'Контрольна перевіряє, що вмієш ти. Це списування.' },
+          { text: 'Просиш ідеї для теми проєкту з географії', a: 1, why: 'Ідеї — це допомога, але вибір і сама робота мають бути твоїми. Скажи вчителю, що радився з ШІ.' }
+        ] } },
+
+    { sec: 'Чесно і безпечно', t: 'Перевіряй факти',
+      h: '<p>ШІ не шукає правду, а пише правдоподібно. Тому:</p><ul class="big"><li>дати, імена й числа звіряй з підручником;</li><li>перевір хоча б в одному надійному джерелі: підручник, енциклопедія, сайт музею чи наукової установи;</li><li>посилання від ШІ відкривай — вони можуть не існувати;</li><li>обчислення перераховуй сам або на калькуляторі;</li><li>сумніваєшся — спитай учителя.</li></ul><p class="try"><span>Звідки почати:</span> <a href="https://uk.wikipedia.org/" target="_blank" rel="noopener noreferrer">Українська Вікіпедія</a> — внизу кожної статті є список джерел.</p>',
+      hand: 'У робочому зошиті тебе чекає відповідь ШІ з трьома вигадками' },
+
+    { sec: 'Чесно і безпечно', t: 'Що не можна розповідати ШІ',
+      h: '<div class="cols2"><div class="card bad"><h3>Не пиши ШІ</h3><ul><li>прізвище, адресу, номер школи й класу разом;</li><li>телефон, пошту, паролі, коди з SMS;</li><li>фото документів;</li><li>чужі фото, секрети друзів, скріншоти переписок;</li><li>де ти зараз перебуваєш.</li></ul></div><div class="card good"><h3>Можна</h3><ul><li>тему уроку і свій клас;</li><li>свій текст без особистих даних;</li><li>запитання про те, чого не розумієш.</li></ul></div></div><div class="age"><b>Вік має значення.</b> ChatGPT — з 13 років, а до 18 — лише з дозволу батьків (<a href="https://openai.com/policies/row-terms-of-use/" target="_blank" rel="noopener noreferrer">правила</a>). Gemini — з дозволу батьків, якщо ти ще не можеш сам керувати своїм Google-акаунтом. Claude — тільки з 18 років (<a href="https://www.anthropic.com/legal/consumer-terms" target="_blank" rel="noopener noreferrer">правила</a>). Перед реєстрацією прочитайте правила сервісу разом з батьками.</div>',
+      hand: 'Пиши ШІ так, ніби це прочитає незнайомець' },
+
+    { sec: 'Чесно і безпечно', t: 'Можна чи краще не писати?',
+      demo: { type: 'classify', id: 's-privacy', options: ['Можна', 'Краще не писати'], tone: ['g', 'r'],
+        items: [
+          { text: '«Я у 8 класі, вивчаємо тему „Атмосфера“»', a: 0, why: 'Клас і тема допомагають ШІ, але нічого не розповідають про тебе особисто.' },
+          { text: '«Мене звати Максим Ткаченко, я з 8-А класу школи №5 у Луцьку»', a: 1, why: 'Прізвище, школа, клас і місто разом точно вказують на тебе. ШІ це не потрібно для відповіді.' },
+          { text: '«Мій пароль від електронного щоденника такий-то. Він надійний?»', a: 1, why: 'Пароль не пишуть нікуди. Спитай краще, якими бувають надійні паролі.' },
+          { text: '«Ось мій твір без імені. Знайди в ньому помилки»', a: 0, why: 'Текст без особистих даних — можна. Тільки виправляй сам.' },
+          { text: 'Фото маминого паспорта, щоб ШІ заповнив анкету', a: 1, why: 'Документи — особисті дані всієї родини. Їх не надсилають у чати.' },
+          { text: '«Як сказати другові, що мені неприємні його жарти?»', a: 0, why: 'Порадитися можна. Тільки без імен і подробиць про інших людей.' }
+        ] } },
+
+    { sec: 'Підсумок', t: 'Цикл роботи з ШІ',
+      h: '<p>Розстав кроки в правильному порядку.</p>',
+      demo: { type: 'order', id: 's-cycle',
+        steps: [ 'Подумай сам і сформулюй, що саме хочеш дізнатися', 'Напиши промпт за формулою з 5 цеглинок', 'Уважно прочитай відповідь', 'Перевір факти в підручнику чи надійному джерелі', 'Уточни або попроси пояснити незрозуміле', 'Запиши висновок своїми словами' ],
+        shuffle: [3, 0, 5, 2, 4, 1],
+        explain: 'Починаєш і закінчуєш ти сам. ШІ — помічник посередині.' } },
+
+    { sec: 'Підсумок', t: 'Головне за заняття',
+      h: '<ol class="rules"><li><b>Промпт</b> — твоє завдання для ШІ. Що зрозуміліше завдання, то корисніша відповідь.</li><li><b>Формула:</b> роль, завдання, контекст, формат, обмеження.</li><li><b>Прийоми:</b> зразок, крок за кроком, репетитор, уточнення, тренажер.</li><li><b>ШІ помиляється впевнено</b> — перевіряй факти.</li><li><b>ШІ допомагає вчитися</b>, а не робить роботу за тебе.</li><li><b>Особисті дані</b> — не для чату.</li></ol>',
+      cta: true }
+  ],
+
+  /* ---------------- РОБОЧИЙ ЗОШИТ ---------------- */
+  notes: '<ul><li><b>Як працює ШІ:</b> читає текст токенами (шматочками слів) і слово за словом обирає продовження. Температура — скільки фантазії. Ембединг — «адреса» слова на карті значень.</li><li><b>Промпт</b> — текст, яким ти ставиш завдання ШІ.</li><li><b>5 цеглинок:</b> роль, завдання, контекст, формат, обмеження. Обов’язкове лише завдання.</li><li><b>Прийоми:</b> покажи зразок; «по кроках»; режим репетитора; уточнюй; тренуйся.</li><li><b>Безпека:</b> перевіряй факти, не пиши особисті дані, не здавай текст від ШІ як свій.</li></ul>',
+  book: [
+    { t: 'Токени своїми руками',
+      h: '<p>Відкрий <a href="https://platform.openai.com/tokenizer" target="_blank" rel="noopener noreferrer">Токенайзер OpenAI</a>, обери <b>GPT-4o</b>. Встав будь-яке речення українською, а потім його переклад англійською. Запиши, скільки вийшло токенів.</p>',
+      w: [ { type: 'fields', id: 'b-tokcount', fields: [ ['ua', 'Моє речення українською', 'Наприклад: Завтра в нас контрольна з алгебри.'], ['ua_n', 'Токенів українською', 'число'], ['en', 'Переклад англійською', 'Tomorrow we have an algebra test.'], ['en_n', 'Токенів англійською', 'число'] ] },
+           { type: 'mcq', id: 'b-moloko', q: 'Чому ШІ може помилитися, якщо спитати: «Скільки літер „о“ у слові „молоко“?»',
+             options: [ 'Він не знає української мови', 'Він бачить слово шматочками «м» + «ол» + «око», а не окремими літерами', 'Таке запитання заборонене', 'Він рахує лише приголосні' ], correct: 1,
+             explain: 'ШІ працює з токенами, а не з літерами. Тому лічити літери чи склади йому важко — краще порахуй сам.' } ] },
+
+    { t: 'Скільки фантазії?',
+      h: '<p>Для яких завдань краще низька температура (точно й передбачувано), а для яких — висока (різноманітно й творчо)?</p>',
+      w: { type: 'classify', id: 'b-temp', options: ['Низька', 'Висока'], tone: ['ctx', 'y'],
+        items: [
+          { text: 'Розв’язати рівняння 2x − 4 = 10', a: 0, why: 'Тут одна правильна відповідь (x = 7), фантазія лише зашкодить.' },
+          { text: 'Вигадати 10 назв для команди на шкільну олімпіаду', a: 1, why: 'Потрібні різні, несподівані ідеї.' },
+          { text: 'Перекласти правило з англійської на українську', a: 0, why: 'Переклад має бути точним.' },
+          { text: 'Написати смішний вірш-привітання для однокласника', a: 1, why: 'Творче завдання — що більше варіантів, то краще.' },
+          { text: 'Назвати рік хрещення Київської Русі', a: 0, why: 'Факт (988 рік) не має залежати від фантазії.' },
+          { text: 'Придумати сюжет коміксу про фотосинтез', a: 1, why: 'Тут цінуються оригінальні ідеї.' }
+        ] } },
+
+    { t: 'Сусіди за змістом',
+      w: [ { type: 'mcq', id: 'b-embed', q: 'На карті значень яке слово буде найближче до слова «лікар»?',
+             options: [ 'олівець', 'медсестра', 'сніг', 'футбол' ], correct: 1,
+             explain: '«Лікар» і «медсестра» — обидва про медицину й лікарню, тому їхні ембединги схожі й на карті вони поруч.' },
+           { type: 'write', id: 'b-embed-res', count: false, rows: 2, label: 'Відкрий Embedding Projector (посилання вище), знайди англійське слово й запиши 3 його найближчих сусідів.' } ],
+      h: '<p class="try"><span>Справжня карта значень:</span> <a href="https://projector.tensorflow.org/" target="_blank" rel="noopener noreferrer">Embedding Projector</a> — праворуч у полі <b>Search</b> введи слово англійською (наприклад, <i>school</i>, <i>music</i>, <i>water</i>) і клацни на знайдену точку.</p>' },
+
+    { t: 'Знайди цеглинки',
+      h: '<p>Ось промпт, розрізаний на частини. Визнач, яка цеглинка кожна частина.</p>',
+      w: { type: 'classify', id: 'b-bricks', options: ['Роль', 'Завдання', 'Контекст', 'Формат', 'Обмеження'], tone: ['role', 'task', 'ctx', 'fmt', 'lim'],
+        items: [
+          { text: '«Ти — вчитель англійської мови.»', a: 0, why: 'Ми кажемо ШІ, ким бути.' },
+          { text: '«Склади 6 речень про літні канікули в часі Past Simple.»', a: 1, why: 'Це головна дія — що зробити.' },
+          { text: '«Я в 7 класі, мій рівень — A2.»', a: 2, why: 'Інформація про тебе допомагає підібрати складність.' },
+          { text: '«Подай таблицею: речення англійською — переклад.»', a: 3, why: 'Ми описуємо вигляд відповіді.' },
+          { text: '«Використовуй лише прості слова, без ідіом.»', a: 4, why: 'Ми кажемо, чого не треба.' }
+        ] } },
+
+    { t: 'Слабкий чи сильний?',
+      h: '<p>Оціни кожен промпт.</p>',
+      w: { type: 'classify', id: 'b-weak', options: ['Слабкий', 'Сильний'], tone: ['r', 'g'],
+        items: [
+          { text: '«Твір»', a: 0, why: 'Невідомо, який твір, для якого класу і що з ним робити.' },
+          { text: '«Я у 8 класі. Допоможи скласти план твору-роздуму „Чи легко бути чесним?“ з 5 пунктів, без готового тексту»', a: 1, why: 'Є клас, тема, формат і обмеження.' },
+          { text: '«Розв’яжи задачу»', a: 0, why: 'ШІ навіть не знає, яку саме задачу.' },
+          { text: '«Поясни, чому вода закипає за 100 °C лише за нормального тиску. Я в 7 класі, 3 речення»', a: 1, why: 'Конкретне запитання, рівень і обсяг.' },
+          { text: '«Розкажи про історію»', a: 0, why: 'Історія чого? Якої країни, якого періоду?' },
+          { text: '«Склади 5 запитань з теми „Козацтво“, став по одному і чекай моєї відповіді»', a: 1, why: 'Зрозуміле завдання і формат тренажера.' }
+        ] } },
+
+    { t: 'Покращ промпт',
+      h: '<p>Учень написав: <span class="pr">«Допоможи з географією»</span>. Перепиши цей промпт так, щоб у ньому були всі 5 цеглинок. Тему вигадай сам або візьми з уроку. Промпт-метр підсвічує цеглинки, які розпізнав у твоєму тексті.</p>',
+      w: { type: 'meter', id: 'b-meter', need: 4, placeholder: 'Ти — …',
+        sample: 'Ти — вчитель географії. Я в 7 класі, у понеділок контрольна з теми «Материки». Поясни, чим відрізняється клімат Африки й Антарктиди. Подай таблицею з 3 рядків: температура, опади, тварини. Пиши просто, без складних термінів.' } },
+
+    { t: 'Яку відповідь дасть ШІ?',
+      w: { type: 'mcq', id: 'b-fewshot',
+        q: 'Ти дав ШІ зразок картки <span class="pr">ancient — давній — The castle is very ancient.</span> і попросив зробити так само для слова <b>brave</b>. Яка відповідь відповідає зразку?',
+        options: [ 'Brave означає «сміливий». Це прикметник, який описує людину без страху…', 'brave — сміливий — The firefighter was very brave.', 'brave [breɪv] (adj.) — хоробрий; синоніми: bold, fearless', 'сміливий — brave' ], correct: 1,
+        explain: 'Зразок задав три частини: слово — переклад — речення. ШІ повторює саме цю форму.' } },
+
+    { t: 'Репетитор: дроби',
+      h: '<p>Цього разу ти розв’язуєш задачу з ШІ-репетитором: <b>знайди 3/4 від 32</b>.</p>',
+      w: { type: 'tutor', id: 'b-tutor',
+        steps: [
+          { ai: 'Щоб знайти 3/4 від числа, спершу знайдемо 1/4. Як це зробити?',
+            opts: [ { t: '32 : 4 = 8', ok: true, reply: 'Так, одна чверть від 32 — це 8.' },
+                    { t: '32 · 4 = 128', reply: 'Чверть — це частина, вона менша за ціле. Ділити чи множити?' },
+                    { t: '32 − 4 = 28', reply: 'Знаменник 4 означає, що ціле ділимо на 4 рівні частини. Яка це дія?' } ] },
+            { ai: 'Одна чверть — 8. А скільки становлять три чверті?',
+              opts: [ { t: '8 + 3 = 11', reply: 'Нам потрібно три такі частини, тобто 8 три рази.' },
+                      { t: '8 · 3 = 24', ok: true, reply: 'Правильно: 3/4 від 32 — це 24.' },
+                      { t: '8 : 3', reply: 'Ділити більше не треба. Нам потрібно три частини по 8.' } ] },
+            { ai: 'Як швидко перевірити відповідь 24?',
+              opts: [ { t: '24 — це більше за половину від 32 (16), але менше за 32', ok: true, reply: 'Чудово! 3/4 — більше за половину, але менше за ціле. Відповідь 24 підходить. Ти розв’язав сам.' },
+                      { t: 'Ніяк', reply: 'Прикидка займає кілька секунд. Порівняй 24 з половиною від 32.' } ] }
+        ] } },
+
+    { t: 'Знайди вигадки ШІ',
+      h: '<p>Учень попросив ШІ коротко розповісти про Тараса Шевченка. У відповіді три вигадки. Натисни на речення, у яких, на твою думку, помилка, а тоді — «Перевірити». Звірити можна з <a href="' + WIKI_SH + '" target="_blank" rel="noopener noreferrer">статтею у Вікіпедії</a> або з підручником.</p>',
+      w: { type: 'findtext', id: 'b-hallu',
+        items: [
+          { t: 'Тарас Шевченко народився 9 березня 1814 року в селі Моринці (тепер Черкаська область).', why: 'Правда.' },
+          { t: 'У дитинстві та юності він був кріпаком.', why: 'Правда.' },
+          { t: 'У 1838 році його викупили з кріпацтва.', why: 'Правда: викуп організували друзі-митці, зокрема Карл Брюллов і Василь Жуковський.' },
+          { t: 'Після звільнення він навчався в Київському університеті.', bad: true, why: 'Вигадка. Шевченко навчався в Петербурзькій академії мистецтв.' },
+          { t: 'Перше видання «Кобзаря» вийшло 1840 року в Санкт-Петербурзі.', why: 'Правда.' },
+          { t: 'Шевченко також написав повість «Тіні забутих предків».', bad: true, why: 'Вигадка. «Тіні забутих предків» написав Михайло Коцюбинський.' },
+          { t: 'Помер поет 1861 року в Києві.', bad: true, why: 'Вигадка. Шевченко помер у Санкт-Петербурзі, а похований на Чернечій горі біля Канева.' },
+          { t: 'Шевченко був не лише поетом, а й художником.', why: 'Правда: він малював портрети, пейзажі, офорти.' }
+        ] } },
+
+    { t: 'Прибери особисте',
+      h: '<p>Ось промпт: <span class="pr">«Привіт! Я Олена Коваленко, вчуся у 8-Б класі школи №12, мій телефон 097 123 45 67. Допоможи написати привітання вчительці з днем народження. Вона дуже любить квіти й подорожі.»</span></p>',
+      w: { type: 'multi', id: 'b-private', q: 'Що потрібно прибрати з промпту?',
+        options: [ 'Прізвище', 'Номер школи і клас', 'Номер телефону', 'Прохання написати привітання', 'Що вчителька любить квіти й подорожі' ], correct: [0, 1, 2],
+        explain: 'Прізвище, школа з класом і телефон ШІ не потрібні, а розповідають про тебе забагато. Безпечна версія: «Допоможи написати привітання вчительці з днем народження. Вона любить квіти й подорожі. Я у 8 класі, тон — теплий, 4–5 речень.»' } },
+
+    { t: 'Світлофор чесності',
+      h: '<p>Ще кілька ситуацій. Де ШІ допомагає вчитися, а де робить роботу замість тебе?</p>',
+      w: { type: 'classify', id: 'b-honest', options: ['Можна', 'Якщо дозволив учитель', 'Не можна'], tone: ['g', 'y', 'r'],
+        items: [
+          { text: 'Просиш ШІ пояснити, чому в задачі з фізики вийшла неправильна відповідь', a: 0, why: 'Розбір своєї помилки — чудовий спосіб учитися.' },
+          { text: 'Копіюєш у домашню роботу відповідь ШІ на запитання з історії, не читаючи', a: 2, why: 'Ти нічого не вивчив, а вчитель оцінить не тебе.' },
+          { text: 'Просиш ШІ перекласти незнайоме слово в тексті з англійської', a: 0, why: 'Це як словник, тільки з прикладами.' },
+          { text: 'Просиш ШІ скласти план презентації, а слайди робиш сам', a: 1, why: 'План — частина роботи. Спитай учителя, чи можна, і скажи, що радився з ШІ.' },
+          { text: 'Просиш ШІ написати реферат і здаєш під своїм іменем', a: 2, why: 'Це чужа робота, видана за свою.' }
+        ] } },
+
+    { t: 'Мій промпт для мого предмета',
+      h: '<p>Обери предмет, який вивчаєш цього тижня, і склади промпт за формулою. Промпт-метр підкаже, чого бракує.</p>' + TRY('Перевір свій промпт у ШІ-чаті (з дозволу батьків):'),
+      w: [ { type: 'meter', id: 'b-own', need: 4, placeholder: 'Предмет, тема — і твій промпт…', sample: 'Ти — вчитель фізики. Я в 9 класі, ми вивчаємо закони Ньютона. Поясни третій закон Ньютона на трьох прикладах зі спорту. Кожен приклад — 2 речення. Без формул, простими словами.' },
+           { type: 'write', id: 'b-own-res', count: false, label: 'Що відповів ШІ і що ти уточнив другим повідомленням?', rows: 4 } ] },
+
+    { t: 'Цикл роботи з ШІ',
+      w: { type: 'order', id: 'b-cycle',
+        steps: [ 'Подумай сам і сформулюй, що саме хочеш дізнатися', 'Напиши промпт за формулою з 5 цеглинок', 'Уважно прочитай відповідь', 'Перевір факти в підручнику чи надійному джерелі', 'Уточни або попроси пояснити незрозуміле', 'Запиши висновок своїми словами' ],
+        shuffle: [4, 2, 0, 5, 1, 3],
+        explain: 'Починаєш і закінчуєш ти сам. ШІ — помічник посередині.' } },
+
+    { hw: true, t: 'Домашнє завдання',
+      h: '<ol><li>Візьми тему, яку вивчаєш цього тижня з будь-якого предмета.</li><li>Напиши два промпти: перший — щоб ШІ пояснив тему, другий — щоб він став тренажером на 5 запитань.</li><li>Разом з батьками (або в школі) спробуй обидва промпти в ШІ-чаті.</li><li>Перевір один факт з відповіді в підручнику.</li><li>Запиши три речення: що допомогло, що було неправильно, що ти змінив би в промпті.</li></ol>',
+      w: [ { type: 'write', id: 'hw-1', count: false, label: 'Промпт 1: пояснення теми', rows: 3 },
+           { type: 'write', id: 'hw-2', count: false, label: 'Промпт 2: тренажер', rows: 3 },
+           { type: 'write', id: 'hw-3', count: false, label: 'Три речення-висновки', rows: 4 } ] }
+  ],
+
+  /* ---------------- ФІНАЛЬНИЙ ТЕСТ ---------------- */
+  test: [
+    { q: 'Що таке токен?', options: ['Шматочок тексту, яким ШІ читає слова', 'Монета для оплати ШІ', 'Пароль від чату', 'Помилка в тексті'], correct: 0, explain: 'ШІ ділить текст на шматочки — токени. Часте слово може бути одним токеном, рідкісне — кількома.' },
+    { q: 'Що робить висока температура?', options: ['Прискорює ШІ', 'Робить відповіді різноманітнішими, а часом дивними', 'Робить відповіді точнішими', 'Вмикає перевірку фактів'], correct: 1, explain: 'Висока температура — більше сміливості у виборі слів: більше ідей, але й більше дивного.' },
+    { q: 'Ембединг — це…', options: ['Емодзі в чаті', 'Назва нейромережі', 'Набір чисел, що описує значення слова, — його «адреса» на карті значень', 'Спосіб шифрування паролів'], correct: 2, explain: 'Слова зі схожим значенням мають схожі ембединги і на карті стоять поруч.' },
+    { q: 'Що таке промпт?', options: ['Програма, яку пишуть розробники ШІ', 'Текст, яким ти ставиш завдання ШІ', 'Відповідь ШІ', 'Налаштування чату'], correct: 1, explain: 'Промпт — це твоє повідомлення-завдання для ШІ.' },
+    { q: 'Яка цеглинка промпту обов’язкова?', options: ['Роль', 'Формат', 'Завдання', 'Обмеження'], correct: 2, explain: 'Без завдання ШІ не знає, що робити. Решта цеглинок покращують відповідь.' },
+    { q: '«Я в 7 класі, завтра контрольна» — яка це цеглинка?', options: ['Контекст', 'Роль', 'Формат', 'Обмеження'], correct: 0, explain: 'Це інформація про тебе і ситуацію — контекст.' },
+    { q: '«Подай відповідь таблицею з трьох стовпців» — яка це цеглинка?', options: ['Завдання', 'Формат', 'Роль', 'Контекст'], correct: 1, explain: 'Ми описуємо, як має виглядати відповідь, — це формат.' },
+    { q: 'Навіщо дописувати «розв’язуй по кроках»?', options: ['Щоб відповідь була довшою', 'Щоб ШІ рідше помилявся і було видно хід розв’язання', 'Щоб ШІ відповідав швидше', 'Це нічого не змінює'], correct: 1, explain: 'Покроковий розв’язок точніший, і в ньому легше знайти помилку.' },
+    { q: 'ШІ назвав дату, якої ти не знав. Що робити?', options: ['Одразу записати в зошит', 'Спитати ШІ ще раз тими самими словами', 'Звірити з підручником або надійним джерелом', 'Нічого, ШІ не помиляється'], correct: 2, explain: 'ШІ може вигадувати дати й факти. Перевіряй у надійному джерелі.' },
+    { q: 'Що з цього можна писати ШІ?', options: ['Свій пароль', 'Тему уроку і свій клас', 'Домашню адресу', 'Номер телефону'], correct: 1, explain: 'Тема і клас допомагають ШІ, але нічого не розповідають про тебе особисто.' },
+    { q: 'Яке використання ШІ нечесне?', options: ['Попросити пояснити тему', 'Попросити тест для самоперевірки', 'Здати твір, написаний ШІ, як свій', 'Попросити ще один приклад'], correct: 2, explain: 'Видавати текст ШІ за свій — це списування.' },
+    { q: 'Що робить промпт «Не давай відповідь, став навідні запитання»?', options: ['Вимикає ШІ', 'Перетворює ШІ на репетитора', 'Змушує ШІ відповідати англійською', 'Робить відповідь коротшою'], correct: 1, explain: 'Так ШІ веде тебе до відповіді, а розв’язуєш ти сам.' },
+    { q: 'Чому ШІ іноді вигадує факти?', options: ['Він хоче пожартувати', 'Він передбачає правдоподібні слова і не перевіряє, чи це правда', 'Його так навмисно налаштували', 'Через повільний інтернет'], correct: 1, explain: 'Мовна модель обирає ймовірні слова. Звучить переконливо — але не завжди правдиво.' }
+  ]
+};
+})();
+
+</script>
+<script>
+/* ==========================================================================
+   РУШІЙ СТОРІНКИ: навігація, слайди, зошит, вправи, зірки.
+   Змінювати не потрібно. Текст заняття — у блоці «ЗМІСТ ЗАНЯТТЯ».
+   ========================================================================== */
+(function(){
+'use strict';
+var L = window.LESSON;
+var CFG = window.LESSON_CONFIG || {};
+var KEY = 'prompt-lab-school-v1';
+var S = {act:{}, txt:{}, student:{}, slide:1};
+try { var raw = localStorage.getItem(KEY); if (raw) { var p = JSON.parse(raw); if (p && typeof p === 'object') S = Object.assign(S, p); } } catch(e) {}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+
+function h(tag, attrs){
+  var e = document.createElement(tag);
+  if (attrs) for (var k in attrs) {
+    var v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'html') e.innerHTML = v;
+    else if (k.slice(0,2) === 'on' && typeof v === 'function') e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (var i = 2; i < arguments.length; i++) add(e, arguments[i]);
+  return e;
+}
+function add(e, kid){
+  if (kid == null || kid === false) return;
+  if (Array.isArray(kid)) { kid.forEach(function(k){ add(e, k); }); return; }
+  e.appendChild(typeof kid === 'string' || typeof kid === 'number' ? document.createTextNode(String(kid)) : kid);
+}
+function btn(label, cls, onclick, extra){ return h('button', Object.assign({type:'button', class:'btn ' + (cls || ''), onclick:onclick}, extra || {}), label); }
+function fbEl(){ return h('div', {class:'fb', role:'status', 'aria-live':'polite'}); }
+function setFb(fb, kind, html){ fb.className = 'fb ' + kind; fb.innerHTML = html; }
+function each(list, fn){ Array.prototype.forEach.call(list, fn); }
+var LET = ['А','Б','В','Г','Д','Е'];
+var OK = ['Правильно!', 'Так і є!', 'Влучно!', 'Саме так!'];
+var BAD = ['Не зовсім.', 'Майже.', 'Ще ні.'];
+var okn = 0, badn = 0;
+function okWord(){ return OK[(okn++) % OK.length]; }
+function badWord(){ return BAD[(badn++) % BAD.length]; }
+var STAR = '<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.55.85-4.8 4.55 1.22 6.5L12 17.3l-5.82 3.15 1.22-6.5-4.8-4.55 6.55-.85z"/></svg>';
+
+/* ---------------- зірки ---------------- */
+function widgetsOf(x){ return x ? (Array.isArray(x) ? x : [x]) : []; }
+var ALL = [];
+L.slides.forEach(function(s){ widgetsOf(s.demo).forEach(function(w){ if (w.id && w.count !== false) ALL.push(w.id); }); });
+L.book.forEach(function(t){ widgetsOf(t.w).forEach(function(w){ if (w.id && w.count !== false) ALL.push(w.id); }); });
+ALL.push('test');
+function stars(){ return ALL.filter(function(id){ return S.act[id]; }).length; }
+var toastEl = null, toastT = null;
+function done(id, s, m){
+  if (!id) return;
+  var first = !S.act[id];
+  if (!S.act[id] || s >= S.act[id].s) S.act[id] = {s:s, m:m};
+  save();
+  if (first && ALL.indexOf(id) >= 0) {
+    updStars();
+    if (toastEl) { toastEl.innerHTML = STAR + '<span>+1 зірка! Разом: ' + stars() + ' з ' + ALL.length + '</span>'; toastEl.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function(){ toastEl.classList.remove('on'); }, 2200); }
+  }
+}
+function updStars(){ each(document.querySelectorAll('[data-stars]'), function(el){ el.textContent = stars() + ' / ' + ALL.length; }); }
+
+/* ---------------- вправи ---------------- */
+var W = {};
+function mount(cfg){
+  var box = h('div', {class:'w w-' + cfg.type});
+  if (cfg.intro) box.appendChild(h('p', {class:'w-intro', html:cfg.intro}));
+  var api = { reset: function(){ box.replaceWith(mount(cfg)); } };
+  box.appendChild(W[cfg.type] ? W[cfg.type](cfg, api) : h('p', null, 'Невідомий тип вправи'));
+  return box;
+}
+function question(q, onAnswer){
+  var wrap = h('div', {class:'qbox'});
+  wrap.appendChild(h('p', {class:'q', html:q.q}));
+  var list = h('div', {class:'opts'});
+  var fb = fbEl(), locked = false;
+  q.options.forEach(function(o, i){
+    var b = h('button', {type:'button', class:'opt', onclick:function(){
+      if (locked) return; locked = true;
+      var ok = i === q.correct;
+      each(list.children, function(c){ c.disabled = true; });
+      b.classList.add(ok ? 'is-ok' : 'is-bad');
+      list.children[q.correct].classList.add('is-ok');
+      setFb(fb, ok ? 'ok' : 'bad', '<b>' + (ok ? okWord() : badWord()) + '</b> ' + (q.explain || ''));
+      onAnswer(ok);
+    }}, h('span', {class:'k'}, LET[i]), h('span', {html:o}));
+    list.appendChild(b);
+  });
+  wrap.appendChild(list); wrap.appendChild(fb);
+  return wrap;
+}
+W.mcq = function(c, api){
+  var root = h('div');
+  var again = btn('Спробувати ще раз', 'ghost small', api.reset); again.hidden = true;
+  root.appendChild(question(c, function(ok){ done(c.id, ok ? 1 : 0, 1); again.hidden = false; }));
+  root.appendChild(again);
+  return root;
+};
+W.quiz = function(c, api){
+  var root = h('div');
+  var n = c.questions.length, answered = 0, right = 0;
+  var res = h('div', {class:'score', hidden:true});
+  c.questions.forEach(function(q, i){
+    var block = question(Object.assign({}, q, {q:'<span class="qn">' + (i + 1) + '/' + n + '</span> ' + q.q}), function(ok){
+      answered++; if (ok) right++;
+      if (answered === n) {
+        done(c.id, right, n);
+        res.hidden = false; res.innerHTML = '';
+        res.appendChild(h('span', {class:'big'}, right + ' з ' + n));
+        res.appendChild(h('span', null, right === n ? 'Жодної помилки!' : right / n >= 0.7 ? 'Чудовий результат. Перечитай пояснення до помилок.' : 'Перечитай пояснення і пройди тест ще раз — вийде краще.'));
+        res.appendChild(btn('Пройти ще раз', 'ghost small', api.reset));
+        if (c.onDone) c.onDone(right, n);
+      }
+    });
+    root.appendChild(block);
+  });
+  root.appendChild(res);
+  return root;
+};
+W.multi = function(c, api){
+  var root = h('div');
+  root.appendChild(h('p', {class:'q', html:c.q}));
+  var sel = {}, list = h('div', {class:'opts'}), fb = fbEl();
+  var again = btn('Спробувати ще раз', 'ghost small', api.reset); again.hidden = true;
+  var check = btn('Перевірити', 'blue', function(){
+    var allOk = true;
+    each(list.children, function(b, i){
+      b.disabled = true;
+      var should = c.correct.indexOf(i) >= 0, chosen = !!sel[i];
+      b.classList.remove('sel');
+      if (should && chosen) b.classList.add('is-ok');
+      else if (!should && chosen) { b.classList.add('is-bad'); allOk = false; }
+      else if (should && !chosen) { b.classList.add('is-missed'); allOk = false; }
+    });
+    setFb(fb, allOk ? 'ok' : 'bad', '<b>' + (allOk ? okWord() : badWord()) + '</b> ' + c.explain);
+    done(c.id, allOk ? 1 : 0, 1); check.hidden = true; again.hidden = false;
+  });
+  c.options.forEach(function(o, i){
+    var b = h('button', {type:'button', class:'opt', 'aria-pressed':'false', onclick:function(){ sel[i] = !sel[i]; b.classList.toggle('sel', sel[i]); b.setAttribute('aria-pressed', String(!!sel[i])); }}, h('span', {class:'k box'}, ''), h('span', {html:o}));
+    list.appendChild(b);
+  });
+  root.appendChild(h('p', {class:'hint'}, 'Можна обрати кілька варіантів.'));
+  root.appendChild(list); root.appendChild(fb); root.appendChild(h('div', {class:'row'}, check, again));
+  return root;
+};
+W.classify = function(c, api){
+  var root = h('div');
+  var picks = c.items.map(function(){ return -1; });
+  var rows = h('div', {class:'cls'}), fb = fbEl();
+  var check = btn('Перевірити', 'blue', null); check.disabled = true;
+  var again = btn('Спробувати ще раз', 'ghost small', api.reset); again.hidden = true;
+  c.items.forEach(function(it, ii){
+    var row = h('div', {class:'cls-row'});
+    row.appendChild(h('div', {class:'cls-text', html:it.text}));
+    var fr = h('div', {class:'cls-field', role:'group'});
+    c.options.forEach(function(o, oi){
+      var p = h('button', {type:'button', class:'pill t-' + ((c.tone && c.tone[oi]) || 'n'), 'aria-pressed':'false', onclick:function(){
+        picks[ii] = oi;
+        each(fr.children, function(x){ x.setAttribute('aria-pressed', 'false'); });
+        p.setAttribute('aria-pressed', 'true');
+        check.disabled = picks.some(function(x){ return x < 0; });
+      }}, o);
+      fr.appendChild(p);
+    });
+    row.appendChild(fr);
+    rows.appendChild(row);
+  });
+  check.addEventListener('click', function(){
+    var score = 0;
+    c.items.forEach(function(it, ii){
+      var row = rows.children[ii], ok = picks[ii] === it.a;
+      if (ok) score++;
+      row.classList.add(ok ? 'ok' : 'bad');
+      each(row.querySelectorAll('.pill'), function(p, oi){ p.disabled = true; if (oi === it.a && !ok) p.classList.add('right'); });
+      row.appendChild(h('div', {class:'cls-ex', html:(ok ? '<b>Так.</b> ' : '<b>Правильно: «' + c.options[it.a] + '».</b> ') + (it.why || '')}));
+    });
+    done(c.id, score, c.items.length);
+    setFb(fb, score === c.items.length ? 'ok' : 'info', '<b>Результат: ' + score + ' з ' + c.items.length + '.</b>' + (score === c.items.length ? ' Усе правильно!' : ' Прочитай пояснення під кожним рядком.'));
+    check.hidden = true; again.hidden = false;
+  });
+  root.appendChild(rows); root.appendChild(fb); root.appendChild(h('div', {class:'row'}, check, again));
+  return root;
+};
+W.order = function(c, api){
+  var root = h('div');
+  var n = c.steps.length, seq = [];
+  var list = h('div', {class:'ord'}), fb = fbEl();
+  var check = btn('Перевірити', 'blue', null); check.disabled = true;
+  var items = c.shuffle.map(function(i){ return {i:i, t:c.steps[i]}; });
+  items.forEach(function(s){
+    var no = h('span', {class:'no'}, '?');
+    var b = h('button', {type:'button', onclick:function(){
+      if (seq.indexOf(s.i) >= 0) return;
+      seq.push(s.i); no.textContent = String(seq.length); b.classList.add('picked');
+      check.disabled = seq.length !== n;
+    }}, no, h('span', {html:s.t}));
+    s.el = b; list.appendChild(b);
+  });
+  check.addEventListener('click', function(){
+    var score = 0;
+    items.forEach(function(s){ var ok = seq.indexOf(s.i) === s.i; if (ok) score++; s.el.classList.add(ok ? 'ok' : 'bad'); s.el.disabled = true; });
+    done(c.id, score, n);
+    var right = '<ol>' + c.steps.map(function(t){ return '<li>' + t + '</li>'; }).join('') + '</ol>';
+    setFb(fb, score === n ? 'ok' : 'bad', '<b>' + (score === n ? 'Усе на своїх місцях!' : 'На своєму місці ' + score + ' з ' + n + '.') + '</b> ' + (score === n ? (c.explain || '') : 'Правильний порядок:' + right + (c.explain || '')));
+    check.hidden = true;
+  });
+  root.appendChild(h('p', {class:'hint'}, 'Натискай кроки по черзі: перший, другий, третій…'));
+  root.appendChild(list); root.appendChild(fb); root.appendChild(h('div', {class:'row'}, check, btn('Почати спочатку', 'ghost small', api.reset)));
+  return root;
+};
+function copyBox(text, id, links){
+  var root = h('div', {class:'copybox'});
+  var pre = h('div', {class:'prompt'}, h('span', {class:'plbl'}, 'Промпт'), h('div', {class:'ptext'}, text));
+  var ok = h('span', {class:'copy-ok', role:'status', 'aria-live':'polite'});
+  var b = btn('Скопіювати', 'blue small', function(){
+    var t = pre.querySelector('.ptext');
+    function fallback(){ try { var r = document.createRange(); r.selectNodeContents(t); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); ok.textContent = 'Текст виділено — натисни Ctrl+C'; } catch(e) { ok.textContent = 'Виділи текст і скопіюй вручну'; } }
+    try { navigator.clipboard.writeText(text).then(function(){ ok.textContent = 'Скопійовано!'; }, fallback); } catch(e) { fallback(); }
+    if (id) done(id, 1, 1);
+  });
+  root.appendChild(pre);
+  var row = h('div', {class:'row'}, b, ok);
+  root.appendChild(row);
+  if (links) root.appendChild(h('p', {class:'try', html:'<span>Спробуй (з дозволу батьків):</span> ' + L.links.ai.map(function(a){ return '<a href="' + a[1] + '" target="_blank" rel="noopener noreferrer">' + a[0] + '</a>'; }).join(' ')}));
+  return root;
+}
+W.copy = function(c){ return copyBox(c.text, c.count === false ? null : c.id, c.links); };
+W.tabs = function(c){
+  var root = h('div');
+  var bar = h('div', {class:'tabs', role:'tablist'});
+  var panel = h('div', {class:'tabpanel', role:'tabpanel'});
+  var seen = {};
+  c.tabs.forEach(function(t, i){ bar.appendChild(h('button', {type:'button', role:'tab', 'aria-selected': i === 0 ? 'true' : 'false', onclick:function(){ sel(i); }}, t.label)); });
+  function sel(i){
+    each(bar.children, function(b, j){ b.setAttribute('aria-selected', String(i === j)); });
+    panel.innerHTML = '';
+    var t = c.tabs[i];
+    if (c.copy) panel.appendChild(copyBox(t.text, null, true)); else panel.innerHTML = t.html;
+    seen[i] = 1;
+    if (c.id && Object.keys(seen).length === c.tabs.length) done(c.id, 1, 1);
+  }
+  root.appendChild(bar); root.appendChild(panel); sel(0);
+  root.appendChild(h('p', {class:'hint'}, 'Відкрий усі вкладки, щоб отримати зірку.'));
+  return root;
+};
+W.flip = function(c){
+  var grid = h('div', {class:'flips'});
+  var opened = {};
+  c.cards.forEach(function(card, i){
+    var b = h('button', {type:'button', class:'flip', 'aria-pressed':'false'});
+    function draw(){
+      var on = b.getAttribute('aria-pressed') === 'true';
+      b.innerHTML = '';
+      b.appendChild(h('span', {class:'ft', html:card.f}));
+      b.appendChild(on ? h('span', {class:'fb2', html:card.b}) : h('span', {class:'fh'}, 'Що це дає?'));
+    }
+    b.addEventListener('click', function(){ b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); draw(); opened[i] = 1; if (Object.keys(opened).length === c.cards.length) done(c.id, 1, 1); });
+    draw(); grid.appendChild(b);
+  });
+  return grid;
+};
+W.nextword = function(c, api){
+  var root = h('div');
+  var words = [c.start], node = 'root', last = null;
+  var sent = h('p', {class:'nw-sent', 'aria-live':'polite'});
+  var opts = h('div', {class:'nw-opts'}), fb = fbEl(), tools = h('div', {class:'row'});
+  function draw(){
+    sent.innerHTML = words.map(function(w, i){ return i === 0 ? w : '<span class="nw-new">' + w + '</span>'; }).join(' ') + (node ? ' <span class="caret" aria-hidden="true"></span>' : '.');
+    opts.innerHTML = ''; tools.innerHTML = '';
+    if (!node) {
+      setFb(fb, last && last.odd ? 'bad' : 'ok', last && last.odd ? c.oddText : c.endText);
+      tools.appendChild(btn('Скласти інше речення', 'ghost small', api.reset));
+      done(c.id, 1, 1); return;
+    }
+    var n = c.nodes[node];
+    n.opts.forEach(function(o){
+      opts.appendChild(h('button', {type:'button', class:'nw-opt' + (o.odd ? ' odd' : ''), onclick:function(){ choose(o); }},
+        h('span', {class:'nw-w'}, o.w), h('span', {class:'bar'}, h('span', {style:'width:' + Math.max(o.p, .8) + '%'})), h('span', {class:'nw-p'}, String(o.p).replace('.', ',') + '%')));
+    });
+    if (n.rest) opts.appendChild(h('p', {class:'hint'}, 'Усі інші слова разом: ' + String(n.rest).replace('.', ',') + '%'));
+    tools.appendChild(btn('Нехай ШІ обере сам', 'ghost small', function(){ choose(n.opts.slice().sort(function(a, b){ return b.p - a.p; })[0]); }));
+  }
+  function choose(o){ words.push(o.w); last = o; node = o.next || null; draw(); }
+  root.appendChild(sent); root.appendChild(opts); root.appendChild(fb); root.appendChild(tools);
+  draw();
+  return root;
+};
+function bubble(who, text, cls){ return h('div', {class:'bubble ' + (who === 'me' ? 'me' : 'ai') + (cls ? ' ' + cls : '')}, h('span', {class:'who'}, who === 'me' ? 'Ти' : 'ШІ'), h('span', {class:'bt'}, text)); }
+W.compare = function(c){
+  var root = h('div', {class:'cmp2'});
+  var sent = {};
+  ['a', 'b'].forEach(function(k){
+    var d = c[k];
+    var col = h('div', {class:'cmp-col'});
+    col.appendChild(h('p', {class:'cmp-lbl'}, d.label));
+    var chat = h('div', {class:'chat'});
+    chat.appendChild(bubble('me', d.prompt));
+    col.appendChild(chat);
+    var b = btn('Надіслати', 'small', function(){
+      b.remove();
+      var typing = h('div', {class:'bubble ai typing', 'aria-label':'ШІ друкує'}, h('i'), h('i'), h('i'));
+      chat.appendChild(typing);
+      setTimeout(function(){
+        typing.replaceWith(bubble('ai', d.answer, 'fresh'));
+        sent[k] = 1;
+        if (sent.a && sent.b) { after.hidden = false; done(c.id, 1, 1); }
+      }, reduced() ? 0 : 700);
+    });
+    col.appendChild(b);
+    root.appendChild(col);
+  });
+  var after = h('div', {class:'fb info', hidden:true, html:'<b>Що змінилося?</b> ' + c.after});
+  var wrap = h('div'); wrap.appendChild(root); wrap.appendChild(after);
+  return wrap;
+};
+function reduced(){ try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e) { return false; } }
+var BRN = {role:'Роль', task:'Завдання', ctx:'Контекст', fmt:'Формат', lim:'Обмеження'};
+W.builder = function(c){
+  var root = h('div', {class:'bld'});
+  var on = {task:true};
+  var ing = h('div', {class:'ing'});
+  var left = h('div', {class:'bld-l'}), right = h('div', {class:'bld-r'});
+  var pre = h('div', {class:'prompt'}, h('span', {class:'plbl'}, 'Промпт'), h('div', {class:'ptext'}));
+  var meter = h('div', {class:'meter', 'aria-live':'polite'});
+  var chat = h('div', {class:'chat'});
+  c.parts.forEach(function(p){
+    var b = h('button', {type:'button', class:'ingb b-' + p.k, 'aria-pressed': on[p.k] ? 'true' : 'false', onclick:function(){ on[p.k] = !on[p.k]; b.setAttribute('aria-pressed', String(!!on[p.k])); draw(); }}, BRN[p.k]);
+    ing.appendChild(b);
+  });
+  function draw(){
+    var lines = c.parts.filter(function(p){ return on[p.k]; });
+    var pt = pre.querySelector('.ptext'); pt.innerHTML = '';
+    if (!lines.length) pt.appendChild(h('span', {class:'muted'}, '(порожньо)'));
+    lines.forEach(function(p){ pt.appendChild(h('span', {class:'pl b-' + p.k}, p.line)); pt.appendChild(document.createTextNode(' ')); });
+    var n = lines.length;
+    meter.innerHTML = '';
+    var st = h('span', {class:'stars5', 'aria-hidden':'true'});
+    for (var i = 0; i < 5; i++) st.appendChild(h('span', {class: (on.task && i < n) ? 'on' : '', html:STAR}));
+    meter.appendChild(st);
+    meter.appendChild(h('b', null, !on.task ? 'Без завдання ШІ не знає, що робити' : n === 5 ? 'Ідеальний промпт!' : n >= 3 ? 'Уже добре. Чого ще бракує?' : 'ШІ відповість, але як вийде'));
+    var A = c.answers, t;
+    if (!on.task) t = A.none;
+    else {
+      var easy = on.ctx || on.lim;
+      t = easy ? (on.fmt ? A.easyFmt : A.easy) : (on.fmt ? A.hardFmt : A.hard);
+      if (on.role) t = A.rolePre + t + A.rolePost;
+    }
+    chat.innerHTML = ''; chat.appendChild(bubble('ai', t));
+    if (n === 5) done(c.id, 1, 1);
+  }
+  left.appendChild(h('p', {class:'hint'}, 'Цеглинки (натискай):')); left.appendChild(ing); left.appendChild(pre); left.appendChild(meter);
+  right.appendChild(h('p', {class:'hint'}, 'Відповідь ШІ:')); right.appendChild(chat);
+  root.appendChild(left); root.appendChild(right);
+  draw();
+  return root;
+};
+W.steps = function(c){
+  var root = h('div', {class:'stp'});
+  root.appendChild(h('div', {class:'task-card', html:'<span class="plbl">Задача</span>' + c.task}));
+  var list = h('ol', {class:'stp-list'});
+  var k = 0;
+  var b = btn('Наступний крок', 'small', function(){
+    if (k < c.steps.length) { list.appendChild(h('li', {class:'fresh', html:c.steps[k]})); k++; }
+    if (k >= c.steps.length) { b.hidden = true; done(c.id, 1, 1); }
+    else b.textContent = 'Наступний крок (' + (k + 1) + ' з ' + c.steps.length + ')';
+  });
+  b.textContent = 'Показати перший крок';
+  root.appendChild(list); root.appendChild(h('div', {class:'row'}, b));
+  return root;
+};
+W.tutor = function(c, api){
+  var root = h('div', {class:'tutor'});
+  var chat = h('div', {class:'chat', 'aria-live':'polite'});
+  var opts = h('div', {class:'tut-opts'});
+  var k = 0;
+  function ask(){
+    var st = c.steps[k];
+    chat.appendChild(bubble('ai', st.ai, 'fresh'));
+    chat.scrollTop = chat.scrollHeight;
+    opts.innerHTML = '';
+    st.opts.forEach(function(o){
+      var b = h('button', {type:'button', class:'opt', onclick:function(){
+        chat.appendChild(bubble('me', o.t, 'fresh'));
+        if (o.ok) {
+          opts.innerHTML = '';
+          chat.appendChild(bubble('ai', o.reply, 'fresh good'));
+          k++;
+          if (k < c.steps.length) setTimeout(ask, reduced() ? 0 : 450);
+          else { done(c.id, 1, 1); opts.appendChild(h('div', {class:'fb ok', html:'<b>Готово!</b> Ти дійшов до відповіді сам — ШІ лише ставив запитання.'})); opts.appendChild(btn('Ще раз', 'ghost small', api.reset)); }
+        } else {
+          b.disabled = true; b.classList.add('is-bad');
+          chat.appendChild(bubble('ai', o.reply, 'fresh hintb'));
+        }
+        chat.scrollTop = chat.scrollHeight;
+      }}, o.t);
+      opts.appendChild(b);
+    });
+  }
+  root.appendChild(chat); root.appendChild(opts);
+  ask();
+  return root;
+};
+W.findtext = function(c, api){
+  var root = h('div');
+  var sel = {};
+  var box = h('div', {class:'ftxt'});
+  var fb = fbEl();
+  var bubbleEl = h('div', {class:'bubble ai wide'}, h('span', {class:'who'}, 'ШІ'));
+  c.items.forEach(function(it, i){
+    var b = h('button', {type:'button', class:'sent', 'aria-pressed':'false', onclick:function(){ sel[i] = !sel[i]; b.setAttribute('aria-pressed', String(!!sel[i])); }}, it.t);
+    box.appendChild(b); box.appendChild(document.createTextNode(' '));
+  });
+  bubbleEl.appendChild(box);
+  var again = btn('Спробувати ще раз', 'ghost small', api.reset); again.hidden = true;
+  var check = btn('Перевірити', 'blue', function(){
+    var found = 0, wrong = 0, total = 0;
+    var ex = h('ul', {class:'ft-ex'});
+    var buttons = box.querySelectorAll('.sent');
+    c.items.forEach(function(it, i){
+      var b = buttons[i]; b.disabled = true;
+      if (it.bad) { total++; if (sel[i]) { found++; b.classList.add('hit'); } else b.classList.add('missed'); ex.appendChild(h('li', {html:'<b>' + it.t + '</b> ' + it.why})); }
+      else if (sel[i]) { wrong++; b.classList.add('false'); ex.appendChild(h('li', {class:'okli', html:'<b>' + it.t + '</b> ' + it.why})); }
+    });
+    var allOk = found === total && wrong === 0;
+    done(c.id, allOk ? 1 : 0, 1);
+    setFb(fb, allOk ? 'ok' : 'info', '<b>Знайдено вигадок: ' + found + ' з ' + total + (wrong ? ', зайвих позначок: ' + wrong : '') + '.</b>');
+    fb.appendChild(ex);
+    check.hidden = true; again.hidden = false;
+  });
+  root.appendChild(bubbleEl); root.appendChild(fb); root.appendChild(h('div', {class:'row'}, check, again));
+  return root;
+};
+var DETECT = [
+  ['role', 'Роль', /(^|[\s.,!?«"])ти\s*[—–-]|уяви|будь\s+мо|виступи|у ролі|в ролі|як\s+(учитель|вчитель|репетитор|екскурсовод|тренер|експерт|викладач)|act as|you are/i],
+  ['task', 'Завдання', /поясни|склади|допоможи|перевір|придумай|порівняй|розкажи|напиши|знайди|зроби|опиши|постав|перелічи|виправ|наведи|дай\s|explain|write|make|give/i],
+  ['ctx', 'Контекст', /\d+\s*-?\s*(й|го|му)?\s*клас|клас[іу]|рівень|контрольн|урок|тем[аиіу]|вивча|готуюся|готуюсь|завтра|не розумію|пропусти|grade/i],
+  ['fmt', 'Формат', /списк|таблиц|пункт|речен|по кроках|кроками|план\b|план[іу]|слів|абзац|схем|картк|запитан|приклад/i],
+  ['lim', 'Обмеження', /не\s+(давай|пиши|використовуй|більше|треба|роби|виправляй|став)|без\s|лише\s|тільки\s|максимум|до\s+\d+\s+(слів|речень)|просто/i]
+];
+W.meter = function(c){
+  var root = h('div');
+  var st = S.txt[c.id] || '';
+  var ta = h('textarea', {id:'ta-' + c.id, rows:'5', placeholder:c.placeholder || '', 'aria-label':'Твій промпт'});
+  ta.value = st;
+  var chips = h('div', {class:'chips'});
+  var verdict = h('p', {class:'hint', 'aria-live':'polite'});
+  function draw(){
+    var t = ta.value, n = 0;
+    chips.innerHTML = '';
+    DETECT.forEach(function(d){
+      var hit = t.trim().length > 3 && d[2].test(t);
+      if (hit) n++;
+      chips.appendChild(h('span', {class:'chip b-' + d[0] + (hit ? ' on' : '')}, (hit ? '✓ ' : '') + d[1]));
+    });
+    verdict.textContent = !t.trim() ? 'Почни писати — цеглинки підсвітяться.' : n >= 5 ? 'Усі 5 цеглинок на місці!' : 'Знайдено цеглинок: ' + n + ' з 5.';
+    if (n >= (c.need || 4)) done(c.id, 1, 1);
+  }
+  ta.addEventListener('input', function(){ S.txt[c.id] = ta.value; save(); draw(); });
+  var sample = h('div', {class:'sample', hidden:true}, h('span', {class:'plbl'}, 'Можливий варіант'), h('div', null, c.sample));
+  var sb = btn('Показати можливий варіант', 'ghost small', function(){ sample.hidden = false; sb.hidden = true; });
+  root.appendChild(ta); root.appendChild(chips); root.appendChild(verdict);
+  root.appendChild(h('p', {class:'hint small'}, 'Промпт-метр шукає слова-підказки, тому інколи помиляється. Головне — щоб промпт був зрозумілий.'));
+  root.appendChild(h('div', {class:'row'}, sb)); root.appendChild(sample);
+  draw();
+  return root;
+};
+W.write = function(c){
+  var ta = h('textarea', {id:'ta-' + c.id, rows:String(c.rows || 4), 'aria-label':c.label || 'Відповідь'});
+  ta.value = S.txt[c.id] || '';
+  ta.addEventListener('input', function(){ S.txt[c.id] = ta.value; save(); });
+  return h('label', {class:'wlabel'}, h('span', null, c.label || ''), ta);
+};
+
+/* ---------------- макет ---------------- */
+W.fields = function(c){
+  var root = h('div', {class:'flds'});
+  var inputs = [];
+  function check(){ if (inputs.every(function(i){ return i.value.trim(); })) done(c.id, 1, 1); }
+  c.fields.forEach(function(f){
+    var key = c.id + ':' + f[0];
+    var inp = h('input', {type:'text', id:'f-' + c.id + '-' + f[0], placeholder:f[2] || '', autocomplete:'off'});
+    inp.value = S.txt[key] || '';
+    inp.addEventListener('input', function(){ S.txt[key] = inp.value; save(); check(); });
+    inputs.push(inp);
+    root.appendChild(h('label', null, h('span', null, f[1]), inp));
+  });
+  return root;
+};
+W.tokens = function(c){
+  var root = h('div', {class:'tok'});
+  var bar = h('div', {class:'tabs', role:'tablist'});
+  var box = h('div', {class:'toks', 'aria-live':'polite'});
+  var cnt = h('p', {class:'tok-cnt'});
+  var note = h('p', {class:'hint'});
+  var cmp = h('div', {class:'tok-cmp'});
+  var seen = {};
+  c.sets.forEach(function(s, i){ bar.appendChild(h('button', {type:'button', role:'tab', 'aria-selected': i === 0 ? 'true' : 'false', onclick:function(){ sel(i); }}, s.label)); });
+  function sel(i){
+    each(bar.children, function(b, j){ b.setAttribute('aria-selected', String(i === j)); });
+    var s = c.sets[i];
+    box.innerHTML = '';
+    s.tokens.forEach(function(t, k){ box.appendChild(h('span', {class:'tk t' + (k % 4), title:'Токен ' + (k + 1)}, t.replace(/ /g, ' '))); });
+    cnt.innerHTML = '<b>' + Array.from(s.text).length + '</b> символів → <b>' + s.tokens.length + '</b> ' + (s.tokens.length % 10 === 1 && s.tokens.length % 100 !== 11 ? 'токен' : (s.tokens.length % 10 >= 2 && s.tokens.length % 10 <= 4 && (s.tokens.length % 100 < 12 || s.tokens.length % 100 > 14)) ? 'токени' : 'токенів');
+    note.innerHTML = s.note || '';
+    seen[i] = 1;
+    if (Object.keys(seen).length === c.sets.length) { done(c.id, 1, 1); showCmp(); }
+  }
+  function showCmp(){
+    var sets = c.sets.filter(function(s){ return s.cmp; });
+    if (cmp.childNodes.length || sets.length < 2) return;
+    var max = Math.max.apply(null, sets.map(function(s){ return s.tokens.length; }));
+    cmp.appendChild(h('p', {class:'hint'}, 'Одне й те саме речення:'));
+    sets.forEach(function(s){ cmp.appendChild(h('div', {class:'tc-row'}, h('span', null, s.label), h('span', {class:'bar'}, h('span', {style:'width:' + (s.tokens.length / max * 100) + '%'})), h('b', null, String(s.tokens.length)))); });
+  }
+  root.appendChild(bar); root.appendChild(box); root.appendChild(cnt); root.appendChild(note); root.appendChild(cmp);
+  root.appendChild(h('p', {class:'hint'}, 'Кожен кольоровий шматочок — окремий токен. Відкрий усі вкладки, щоб отримати зірку.'));
+  sel(0);
+  return root;
+};
+function pct(x){ var v = x * 100; if (v < 1) return v.toFixed(1).replace('.', ',') + '%'; return Math.round(v) + '%'; }
+W.temperature = function(c){
+  var root = h('div', {class:'temp'});
+  var T = 1, triedLow = false, triedHigh = false;
+  var val = h('output', {class:'temp-val'});
+  var range = h('input', {type:'range', id:'temp-' + c.id, min:'0.1', max:'2', step:'0.1', value:'1', 'aria-label':'Температура'});
+  var bars = h('div', {class:'nw-opts'});
+  var gen = h('div', {class:'gen', 'aria-live':'polite'});
+  var note = h('p', {class:'hint'});
+  function probs(){ var z = c.logits.map(function(l){ return l / T; }); var m = Math.max.apply(null, z); var e = z.map(function(x){ return Math.exp(x - m); }); var s = e.reduce(function(a, b){ return a + b; }, 0); return e.map(function(x){ return x / s; }); }
+  function mood(){ return T <= 0.5 ? 'обережно: майже завжди одне й те саме' : T < 1.5 ? 'звичайно: є різноманіття' : 'сміливо: багато різних, часом дивних слів'; }
+  function draw(){
+    val.textContent = T.toFixed(1).replace('.', ',') + ' — ' + mood();
+    var p = probs(); bars.innerHTML = '';
+    c.words.forEach(function(w, i){
+      bars.appendChild(h('div', {class:'nw-opt static' + (i === c.odd ? ' odd' : '')}, h('span', {class:'nw-w'}, w), h('span', {class:'bar'}, h('span', {style:'width:' + Math.max(p[i] * 100, .6) + '%'})), h('span', {class:'nw-p'}, pct(p[i]))));
+    });
+  }
+  function setT(t){ T = t; range.value = String(t); draw(); }
+  range.addEventListener('input', function(){ T = parseFloat(range.value); draw(); });
+  var presets = h('div', {class:'row'});
+  c.presets.forEach(function(pr){ presets.appendChild(btn(pr.label, 'ghost small', function(){ setT(pr.t); })); });
+  var g = btn('Згенерувати 10 відповідей', 'blue small', function(){
+    var p = probs(); gen.innerHTML = ''; var odd = 0, uniq = {};
+    for (var k = 0; k < 10; k++) {
+      var r = Math.random(), acc = 0, pick = p.length - 1;
+      for (var i = 0; i < p.length; i++) { acc += p[i]; if (r <= acc) { pick = i; break; } }
+      if (pick === c.odd) odd++;
+      uniq[pick] = 1;
+      gen.appendChild(h('span', {class: pick === c.odd ? 'odd' : ''}, c.words[pick]));
+    }
+    note.textContent = 'Різних відповідей: ' + Object.keys(uniq).length + ' з 10.' + (odd ? ' «' + c.words[c.odd] + '» трапився ' + odd + ' раз(и) — ось так виглядає забагато фантазії.' : '');
+    if (T <= 0.5) triedLow = true;
+    if (T >= 1.5) triedHigh = true;
+    if (triedLow && triedHigh) done(c.id, 1, 1);
+    else note.textContent += triedLow ? ' Тепер спробуй високу температуру.' : triedHigh ? ' Тепер спробуй низьку температуру.' : ' Спробуй низьку і високу температуру.';
+  });
+  root.appendChild(h('div', {class:'temp-ctl'}, h('label', {for:'temp-' + c.id}, 'Температура'), range, val));
+  root.appendChild(presets);
+  root.appendChild(h('p', {class:'nw-sent'}, c.prefix + ' …'));
+  root.appendChild(bars);
+  root.appendChild(h('div', {class:'row'}, g));
+  root.appendChild(gen); root.appendChild(note);
+  draw();
+  return root;
+};
+W.meaningmap = function(c, api){
+  var NS = 'http://www.w3.org/2000/svg';
+  function s(tag, at){ var e = document.createElementNS(NS, tag); for (var k in at) e.setAttribute(k, at[k]); return e; }
+  var root = h('div', {class:'mm'});
+  var wrap = h('div', {class:'mm-wrap'});
+  var svg = s('svg', {viewBox:'0 0 600 360', class:'mm-svg', role:'img', 'aria-label':'Спрощена карта значень слів'});
+  c.groups.forEach(function(g){
+    svg.appendChild(s('rect', {x:g.x, y:g.y, width:g.w, height:g.h, rx:'18', class:'mm-zone z-' + g.tone}));
+    var t = s('text', {x:g.x + 14, y:g.y + 24, class:'mm-glbl'}); t.textContent = g.name.toUpperCase(); svg.appendChild(t);
+  });
+  var gLines = s('g', {class:'mm-lines'}), gPts = s('g');
+  svg.appendChild(gLines); svg.appendChild(gPts);
+  wrap.appendChild(svg);
+  var info = h('p', {class:'mm-info', 'aria-live':'polite'}, 'Натисни на будь-яке слово на карті — побачиш його найближчих сусідів.');
+  var pts = c.points.map(function(p){ return Object.assign({}, p); });
+  var cur = null;
+  function near(p){ return pts.filter(function(q){ return q !== p; }).map(function(q){ return {q:q, d:Math.hypot(q.x - p.x, q.y - p.y)}; }).sort(function(a, b){ return a.d - b.d; }).slice(0, 3); }
+  function draw(){
+    gPts.innerHTML = ''; gLines.innerHTML = '';
+    var nb = cur ? near(cur) : [];
+    nb.forEach(function(n){ gLines.appendChild(s('line', {x1:cur.x, y1:cur.y, x2:n.q.x, y2:n.q.y})); });
+    pts.forEach(function(p){
+      var isN = nb.some(function(n){ return n.q === p; });
+      var g = s('g', {class:'mm-pt' + (p === cur ? ' cur' : '') + (isN ? ' nb' : '') + (p.fresh ? ' fresh' : ''), tabindex:'0', role:'button', 'aria-label':'Слово ' + p.w});
+      g.appendChild(s('circle', {cx:p.x, cy:p.y, r: p === cur ? 8 : 6}));
+      var t = s('text', {x:p.x + 11, y:p.y + 6}); t.textContent = p.w; g.appendChild(t);
+      g.addEventListener('click', function(){ pick(p); });
+      g.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(p); } });
+      gPts.appendChild(g);
+    });
+  }
+  function pick(p){ cur = p; p.fresh = false; draw(); info.innerHTML = 'Найближчі сусіди слова <b>«' + p.w + '»</b>: ' + near(p).map(function(n){ return '«' + n.q.w + '»'; }).join(', ') + '.'; }
+  root.appendChild(wrap); root.appendChild(h('p', {class:'hint mm-hint'}, 'Карту можна гортати вбік.')); root.appendChild(info);
+  /* нові слова */
+  var mq = h('div', {class:'mm-q'});
+  var fb = fbEl();
+  var k = 0;
+  function ask(){
+    mq.innerHTML = '';
+    if (k >= c.mystery.length) { mq.appendChild(h('div', {class:'fb ok', html:'<b>Усі слова на своїх місцях!</b> Так і ШІ: слова зі схожим значенням отримують схожі числа й опиняються поруч.'})); done(c.id, 1, 1); return; }
+    var m = c.mystery[k];
+    mq.appendChild(h('p', {class:'q'}, 'Куди ШІ поставить нове слово ', h('span', {class:'pr'}, m.w), '?'));
+    var row = h('div', {class:'row'});
+    c.groups.forEach(function(g, gi){
+      var b = btn(g.name, 'ghost small', function(){
+        if (gi === m.g) {
+          var p = {w:m.w, x:m.x, y:m.y, fresh:true}; pts.push(p); cur = p; draw();
+          info.innerHTML = 'Слово <b>«' + m.w + '»</b> стало поруч: найближчі сусіди — ' + near(p).map(function(n){ return '«' + n.q.w + '»'; }).join(', ') + '.';
+          setFb(fb, '', ''); k++; ask();
+        } else { b.disabled = true; setFb(fb, 'bad', '<b>' + badWord() + '</b> Подумай, до якої групи слово «' + m.w + '» найближче за змістом.'); }
+      });
+      row.appendChild(b);
+    });
+    mq.appendChild(row);
+  }
+  root.appendChild(mq); root.appendChild(fb);
+  draw(); ask();
+  return root;
+};
+
+var app, mainEl;
+function brandMark(){ return h('span', {class:'mark-ic', 'aria-hidden':'true', html:'<svg viewBox="0 0 32 32"><path d="M6 7.5A3.5 3.5 0 0 1 9.5 4h13A3.5 3.5 0 0 1 26 7.5v10a3.5 3.5 0 0 1-3.5 3.5H14l-5.5 4.5V21h0A3.5 3.5 0 0 1 6 17.5z"/><circle cx="11.5" cy="12.5" r="1.6"/><circle cx="16" cy="12.5" r="1.6"/><circle cx="20.5" cy="12.5" r="1.6"/></svg>'}); }
+function school(cls){
+  if (!CFG.SCHOOL_NAME && !CFG.LOGO_URL) return null;
+  return h('span', {class:'school ' + (cls || '')}, CFG.LOGO_URL ? h('img', {src:CFG.LOGO_URL, alt:CFG.SCHOOL_NAME || 'Логотип'}) : null, CFG.SCHOOL_NAME && !CFG.LOGO_URL ? CFG.SCHOOL_NAME : null);
+}
+function curRoute(){ return (location.hash || '#/').slice(2).split('/'); }
+function header(){
+  var r = curRoute()[0] || '';
+  function link(href, label, key){ return h('a', {href:href, class: r === key ? 'on' : '', 'aria-current': r === key ? 'page' : null}, label); }
+  return h('header', {class:'top'},
+    h('a', {href:'#/', class:'brand'}, brandMark(), h('span', null, L.title)),
+    school('in-top'),
+    h('nav', {class:'tnav', 'aria-label':'Розділи'}, link('#/', 'Головна', ''), link('#/s/' + (S.slide || 1), 'Презентація', 's'), link('#/book', 'Зошит', 'book'), link('#/test', 'Тест', 'test')),
+    h('span', {class:'starpill', title:'Зірки за виконані завдання'}, h('span', {html:STAR}), h('span', {'data-stars':''}, stars() + ' / ' + ALL.length)));
+}
+function showHome(){
+  var st = h('div', {class:'page'});
+  var hero = h('section', {class:'hero'});
+  var left = h('div', {class:'hero-l'});
+  left.appendChild(h('h1', {html:'Як говорити з <mark>ШІ</mark>, щоб він допомагав учитися'}));
+  left.appendChild(h('p', {class:'lead'}, 'Розберемо, що таке промпт, навіщо його вчитися писати і як це робити — на задачах з математики, мови, історії, біології та інших предметів.'));
+  left.appendChild(h('div', {class:'row cta'}, h('a', {class:'btn big', href:'#/s/' + (S.slide || 1)}, S.slide > 1 ? 'Продовжити заняття' : 'Почати заняття'), h('a', {class:'btn ghost big', href:'#/book'}, 'Робочий зошит')));
+  hero.appendChild(left);
+  var demo = h('div', {class:'hero-r', 'aria-hidden':'true'});
+  demo.appendChild(h('div', {class:'chat'}, bubble('me', 'дроби'), bubble('ai', 'Дроби — це числа виду a/b, де… (і ще 2 сторінки)'), bubble('me', 'Я в 6 класі. Поясни на прикладі піци, як додати 1/2 і 1/4. Коротко, по кроках.'), bubble('ai', '1) Розріжемо піцу на 4 шматки. 2) 1/2 — це 2 шматки. 3) 2 + 1 = 3 шматки, тобто 3/4.')));
+  demo.appendChild(h('p', {class:'hand'}, 'Відчуваєш різницю?'));
+  hero.appendChild(demo);
+  st.appendChild(hero);
+
+  st.appendChild(h('h2', {class:'sec-t'}, 'Що буде на занятті'));
+  var learn = h('div', {class:'learn'});
+  [['Як працює ШІ і що таке промпт', 'Токени, температура, карта значень — простими словами. І чому від запитання залежить так багато.'],
+   ['Формула з 5 цеглинок', 'Роль, завдання, контекст, формат, обмеження — і тренажер, де їх можна збирати.'],
+   ['5 прийомів', 'Зразок, крок за кроком, ШІ-репетитор, уточнення, тренування перед контрольною.'],
+   ['Чесно й безпечно', 'Де допомога, а де списування. Як ловити вигадки ШІ і що не можна йому розповідати.']].forEach(function(x, i){
+    learn.appendChild(h('div', {class:'lc'}, h('span', {class:'lc-n'}, String(i + 1)), h('h3', null, x[0]), h('p', null, x[1])));
+  });
+  st.appendChild(learn);
+
+  st.appendChild(h('h2', {class:'sec-t'}, 'Матеріали'));
+  var bookN = L.book.filter(function(t){ return !t.hw; }).length;
+  var mats = h('div', {class:'mats'});
+  mats.appendChild(h('a', {class:'mat', href:'#/s/1'}, h('h3', null, 'Презентація'), h('p', null, L.slides.length + ' слайдів з вправами просто на слайдах.'), h('span', {class:'go'}, 'Відкрити')));
+  mats.appendChild(h('a', {class:'mat', href:'#/book'}, h('h3', null, 'Робочий зошит'), h('p', null, bookN + ' завдань з перевіркою і домашнє завдання.'), h('span', {class:'go'}, 'Відкрити')));
+  mats.appendChild(h('a', {class:'mat', href:'#/test'}, h('h3', null, 'Фінальний тест'), h('p', null, S.act.test ? 'Твій результат: ' + S.act.test.s + ' з ' + S.act.test.m + '.' : L.test.length + ' запитань і сертифікат «Майстер промптів».'), h('span', {class:'go'}, 'Відкрити')));
+  st.appendChild(mats);
+  st.appendChild(h('div', {class:'progress'}, h('span', {html:STAR}), h('p', null, 'Зібрано зірок: ', h('b', {'data-stars':''}, stars() + ' / ' + ALL.length), '. Зірку дають за кожну виконану вправу на слайдах, у зошиті й за тест. Прогрес зберігається в цьому браузері.')));
+  return st;
+}
+function buildSlide(i){
+  var sl = L.slides[i - 1], total = L.slides.length;
+  var card = h('article', {class:'slide' + (sl.kind === 'title' ? ' s-title' : ''), 'aria-label':'Слайд ' + i + ' з ' + total});
+  if (sl.kind === 'title') {
+    card.appendChild(h('div', {class:'st-top'}, brandMark(), school('in-slide')));
+    card.appendChild(h('h1', {id:'slide-title', html:sl.t}));
+    card.appendChild(h('p', {class:'s-sub'}, sl.sub));
+    var chips = h('div', {class:'tchips'}); sl.chips.forEach(function(c){ chips.appendChild(h('span', null, c)); });
+    card.appendChild(chips);
+    card.appendChild(h('div', {class:'deco', 'aria-hidden':'true'}, h('span', {class:'d1'}, 'Поясни…'), h('span', {class:'d2'}, 'простими словами'), h('span', {class:'d3'}, 'по кроках')));
+    return card;
+  }
+  card.appendChild(h('div', {class:'s-kick'}, h('span', null, sl.sec), school('in-slide')));
+  card.appendChild(h('h2', {id:'slide-title', html:sl.t}));
+  var body = h('div', {class:'s-body'});
+  if (sl.h) body.appendChild(h('div', {class:'s-content', html:sl.h}));
+  widgetsOf(sl.demo).forEach(function(d){ body.appendChild(mount(d)); });
+  if (sl.after) body.appendChild(h('div', {class:'s-content', html:sl.after}));
+  if (sl.cta) body.appendChild(h('div', {class:'row'}, h('a', {class:'btn big', href:'#/book'}, 'До робочого зошита'), h('a', {class:'btn ghost big', href:'#/test'}, 'Фінальний тест')));
+  card.appendChild(body);
+  if (sl.hand) card.appendChild(h('p', {class:'hand', html:'<svg viewBox="0 0 40 24" aria-hidden="true"><path d="M2 20 C 12 4, 24 2, 36 8 M30 3 L37 8 L30 13"/></svg>' + sl.hand}));
+  card.appendChild(h('div', {class:'sfoot'}, h('span', null, L.title), h('span', null, i + ' / ' + total)));
+  return card;
+}
+function fillDeck(wrap, i){
+  var total = L.slides.length;
+  S.slide = i; save();
+  wrap.innerHTML = '';
+  wrap.appendChild(buildSlide(i));
+  var prev = i > 1 ? h('a', {class:'btn ghost', href:'#/s/' + (i - 1), 'aria-label':'Попередній слайд'}, '← Назад') : h('a', {class:'btn ghost', href:'#/'}, 'На головну');
+  var next = i < total ? h('a', {class:'btn', href:'#/s/' + (i + 1), 'aria-label':'Наступний слайд'}, 'Далі →') : h('a', {class:'btn', href:'#/book'}, 'До зошита');
+  var dots = h('div', {class:'sdots'});
+  L.slides.forEach(function(_, k){ dots.appendChild(h('a', {href:'#/s/' + (k + 1), class: k + 1 === i ? 'cur' : (k + 1 < i ? 'seen' : ''), 'aria-label':'Слайд ' + (k + 1), 'aria-current': k + 1 === i ? 'step' : null})); });
+  var mid = h('div', {class:'mid'}, dots);
+  if (document.fullscreenEnabled) mid.appendChild(btn(document.fullscreenElement ? 'Вийти з повного екрана' : 'На весь екран', 'ghost small', function(){ try { if (document.fullscreenElement) document.exitFullscreen(); else wrap.requestFullscreen().catch(function(){}); } catch(e) {} }));
+  wrap.appendChild(h('div', {class:'navbar'}, prev, mid, next));
+}
+function showSlides(i){
+  i = Math.min(Math.max(1, i || 1), L.slides.length);
+  var st = h('div', {class:'page wide'});
+  var wrap = h('div', {class:'deck'});
+  fillDeck(wrap, i);
+  st.appendChild(wrap);
+  st.appendChild(h('p', {class:'hint center'}, 'Гортати можна стрілками ← → на клавіатурі.'));
+  return st;
+}
+function studentFields(list){
+  var who = h('div', {class:'who'});
+  list.forEach(function(f){
+    var inp = h('input', {type:'text', id:'st-' + f[0], autocomplete:'off'});
+    inp.value = S.student[f[0]] || '';
+    inp.addEventListener('input', function(){ S.student[f[0]] = inp.value; save(); });
+    who.appendChild(h('label', null, h('span', null, f[1]), inp));
+  });
+  return who;
+}
+function showBook(){
+  var st = h('div', {class:'page'});
+  var page = h('article', {class:'book'});
+  page.appendChild(h('header', {class:'bhead'}, h('div', null, h('p', {class:'btitle'}, 'Робочий зошит'), h('h1', {id:'slide-title'}, L.title)), school('in-book')));
+  page.appendChild(studentFields([['name', 'Ім’я'], ['class', 'Клас'], ['date', 'Дата']]));
+  page.appendChild(h('section', {class:'notes'}, h('h2', null, 'Коротко про головне'), h('div', {html:L.notes})));
+  var k = 0;
+  L.book.forEach(function(t){
+    var sec = h('section', {class:'task' + (t.hw ? ' hw' : '')});
+    sec.appendChild(h('h2', null, t.hw ? null : h('span', {class:'tn'}, String(++k)), t.t));
+    if (t.h) sec.appendChild(h('div', {class:'task-text', html:t.h}));
+    widgetsOf(t.w).forEach(function(w){ sec.appendChild(mount(w)); });
+    page.appendChild(sec);
+  });
+  st.appendChild(page);
+  st.appendChild(h('div', {class:'navbar'}, h('a', {class:'btn ghost', href:'#/s/' + (S.slide || 1)}, '← До презентації'), h('span'), h('a', {class:'btn', href:'#/test'}, 'Фінальний тест →')));
+  return st;
+}
+function certificate(right, n){
+  var name = (S.student.name || '').trim();
+  return h('div', {class:'cert', role:'region', 'aria-label':'Сертифікат'},
+    h('div', {class:'cert-badge', html:STAR}),
+    h('p', {class:'cert-k'}, 'Сертифікат'),
+    h('h2', null, 'Майстер промптів'),
+    h('p', {class:'cert-name'}, name || 'Впиши своє ім’я вгорі сторінки'),
+    h('p', null, 'пройшов(-ла) заняття «' + L.title + '»'),
+    h('div', {class:'cert-row'}, h('span', null, 'Тест: ', h('b', null, right + ' з ' + n)), h('span', null, 'Зірки: ', h('b', null, stars() + ' з ' + ALL.length)), S.student.date ? h('span', null, 'Дата: ', h('b', null, S.student.date)) : null));
+}
+function showTest(){
+  var st = h('div', {class:'page'});
+  var page = h('article', {class:'book'});
+  page.appendChild(h('header', {class:'bhead'}, h('div', null, h('p', {class:'btitle'}, 'Фінальний тест'), h('h1', {id:'slide-title'}, L.title)), school('in-book')));
+  page.appendChild(studentFields([['name', 'Ім’я'], ['class', 'Клас'], ['date', 'Дата']]));
+  page.appendChild(h('p', null, L.test.length + ' запитань. Після кожної відповіді з’являється пояснення, а наприкінці — сертифікат.'));
+  var certBox = h('div');
+  if (S.act.test) certBox.appendChild(certificate(S.act.test.s, S.act.test.m));
+  page.appendChild(mount({type:'quiz', id:'test', questions:L.test, onDone:function(r, n){ certBox.innerHTML = ''; certBox.appendChild(certificate(S.act.test.s, n)); setTimeout(function(){ try { certBox.scrollIntoView({behavior: reduced() ? 'auto' : 'smooth', block:'center'}); } catch(e) {} }, 50); }}));
+  page.appendChild(certBox);
+  st.appendChild(page);
+  st.appendChild(h('div', {class:'navbar'}, h('a', {class:'btn ghost', href:'#/book'}, '← До зошита'), h('span'), h('a', {class:'btn', href:'#/'}, 'На головну')));
+  return st;
+}
+function route(){
+  var r = curRoute();
+  if (r[0] === 's') {
+    var wrap = mainEl.querySelector('.deck');
+    var i = Math.min(Math.max(1, +r[1] || 1), L.slides.length);
+    if (wrap) { fillDeck(wrap, i); refreshHeader(); if (!document.fullscreenElement) window.scrollTo(0, 0); else wrap.scrollTop = 0; focusTitle(); return; }
+  }
+  var view;
+  if (r[0] === 's') view = showSlides(+r[1]);
+  else if (r[0] === 'book') view = showBook();
+  else if (r[0] === 'test') view = showTest();
+  else view = showHome();
+  mainEl.innerHTML = ''; mainEl.appendChild(view);
+  refreshHeader();
+  window.scrollTo(0, 0);
+  focusTitle();
+}
+function focusTitle(){ var t = mainEl.querySelector('#slide-title, h1'); if (t) { t.setAttribute('tabindex', '-1'); try { t.focus({preventScroll:true}); } catch(e) {} } }
+function refreshHeader(){ var old = app.querySelector('header.top'); var nw = header(); if (old) old.replaceWith(nw); else app.insertBefore(nw, app.firstChild); }
+function init(){
+  app = h('div', {class:'app'});
+  mainEl = h('main', {id:'main'});
+  toastEl = h('div', {class:'toast', role:'status', 'aria-live':'polite'});
+  app.appendChild(mainEl);
+  app.appendChild(h('footer', {class:'foot'}, h('span', null, L.title + ' · заняття з промпт-інженерії для школярів'), school('in-foot')));
+  document.body.appendChild(app);
+  document.body.appendChild(toastEl);
+  refreshHeader();
+  window.addEventListener('hashchange', route);
+  document.addEventListener('fullscreenchange', function(){ var r = curRoute(); var wrap = mainEl.querySelector('.deck'); if (wrap && r[0] === 's') fillDeck(wrap, +r[1] || 1); });
+  document.addEventListener('keydown', function(e){
+    if (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+    var r = curRoute(); if (r[0] !== 's') return;
+    var i = +r[1] || 1;
+    if ((e.key === 'ArrowRight' || e.key === 'PageDown') && i < L.slides.length) { e.preventDefault(); location.hash = '#/s/' + (i + 1); }
+    if ((e.key === 'ArrowLeft' || e.key === 'PageUp') && i > 1) { e.preventDefault(); location.hash = '#/s/' + (i - 1); }
+  });
+  route();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+window.__lesson = {S:S, ALL:ALL, route:route};
+})();
+
+</script>
+</body>
+</html>
